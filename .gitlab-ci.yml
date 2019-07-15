@@ -7,7 +7,7 @@
     image: golang:1.11.9-alpine3.9
     script: 
       - apk add make
-      - make buildBinary
+      - GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build -mod vendor -a -installsuffix cgo -o funk_server .
     cache:
       paths:
         - funk_server
@@ -22,7 +22,7 @@
       paths:
         - funk_server
     script: 
-      - make buildDocker
+      - docker build --build-arg buildNumber=${CI_PIPELINE_IID} -t fasibio/funk_server:${CI_PIPELINE_IID} .
  publish: 
    stage: publish
    image: docker
@@ -31,7 +31,8 @@
    tags:
      - dockerfasibio
    script: 
-     - make publishDocker
+     - docker login -u ${dockerhubuser} -p ${dockerhubpassword}
+     - docker push fasibio/funk_server:${CI_PIPELINE_IID}
 
 
  stages:
