@@ -14,6 +14,7 @@ type DataServiceWebSocket struct {
 	ClientConnections map[string]*websocket.Conn
 	genUID            func() (string, error)
 	Db                *KonfigData
+	ConnectionAllowed func(*http.Request) bool
 }
 
 func (u *DataServiceWebSocket) Root(w http.ResponseWriter, r *http.Request) {
@@ -21,6 +22,10 @@ func (u *DataServiceWebSocket) Root(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *DataServiceWebSocket) Subscribe(w http.ResponseWriter, r *http.Request) {
+	if !u.ConnectionAllowed(r) {
+		log.Println("Connection forbidden")
+		w.WriteHeader(401)
+	}
 	log.Println("New Subscribe Client")
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {

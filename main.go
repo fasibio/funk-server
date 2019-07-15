@@ -14,6 +14,7 @@ import (
 
 type Handler struct {
 	dataserviceHandler *DataServiceWebSocket
+	connectionkey      string
 }
 
 func main() {
@@ -34,6 +35,12 @@ func main() {
 			Value:  "http://127.0.0.1:9200",
 			Usage:  "Elasticsearch url",
 		},
+		cli.StringFlag{
+			Name:   "connectionkey",
+			EnvVar: "CONNECTION_KEY",
+			Value:  "changeMe04cf242924f6b5f96",
+			Usage:  "The connectionkey given to the funk_agent so he can connect",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -50,13 +57,14 @@ func run(c *cli.Context) error {
 		panic(err)
 	}
 	handler := Handler{
+		connectionkey: c.String("connectionkey"),
 		dataserviceHandler: &DataServiceWebSocket{
 			Db:                &db,
 			ClientConnections: make(map[string]*websocket.Conn),
 			genUID:            genUID,
 		},
 	}
-
+	handler.dataserviceHandler.ConnectionAllowed = handler.ConnectionAllowed
 	router := chi.NewMux()
 	router.Get("/", handler.dataserviceHandler.Root)
 	router.HandleFunc("/data/subscribe", handler.dataserviceHandler.Subscribe)
@@ -64,6 +72,11 @@ func run(c *cli.Context) error {
 	log.Fatal(http.ListenAndServe(":"+port, router))
 	return nil
 
+}
+
+func (h *Handler) ConnectionAllowed(r *http.Request) bool {
+	key := r.Header.Get("funk.connection")
+	return key == h.connectionkey
 }
 
 func genUID() (string, error) {
