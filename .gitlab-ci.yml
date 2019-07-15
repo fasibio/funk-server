@@ -1,0 +1,39 @@
+ buildBin: 
+    stage: buildBin
+    only:
+     - master
+    tags:
+      - dockerfasibio
+    image: golang:1.11.9-alpine3.9
+    script: 
+      - make buildBinary
+    cache:
+      paths:
+        - funk_server
+ buildImage: 
+    stage: buildImage
+    only:
+     - master
+    tags:
+      - dockerfasibio
+    image: docker
+    cache:
+      paths:
+        - funk_server
+    script: 
+      - make buildDocker
+ publish: 
+   stage: publish
+   image: docker
+   only:
+     - master
+   tags:
+     - dockerfasibio
+   script: 
+     - make publishDocker
+
+
+ stages:
+   - buildBin
+   - buildImage
+   - publish

@@ -4,7 +4,7 @@ RUN apk add libgcc libstdc++ libx11 glib libxrender libxext libintl
 
 WORKDIR /app
 RUN mkdir cert
-ADD ./simpletracker_server /app/simpletracker_server
+ADD ./funk_server /app/funk_server
 COPY ./cert/ /app/cert/
 EXPOSE 3000
-CMD [ "/app/simpletracker_server" ]
+CMD [ "/app/funk_server" ]
