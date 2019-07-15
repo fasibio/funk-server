@@ -23,11 +23,11 @@ func genID() string {
 func NewElasticDb(url, esmapping string) (KonfigData, error) {
 	ctx := context.Background()
 	var client *elastic.Client
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 20; i++ {
 		c, err := elastic.NewSimpleClient(elastic.SetURL(url))
 		if err != nil {
 			time.Sleep(1 * time.Second)
-			if i == 9 {
+			if i == 19 {
 				return KonfigData{}, err
 			}
 			log.Println("Error by Connect to Elastic Search", err)
