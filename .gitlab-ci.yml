@@ -6,6 +6,7 @@
       - dockerfasibio
     image: golang:1.11.9-alpine3.9
     script: 
+      - apk add make
       - make buildBinary
     cache:
       paths:
