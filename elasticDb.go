@@ -2,10 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"time"
 
+	"github.com/fasibio/funk-server/logger"
 	"github.com/olivere/elastic"
 	"github.com/segmentio/ksuid"
 )
@@ -30,7 +29,7 @@ func NewElasticDb(url, esmapping string) (KonfigData, error) {
 			if i == 19 {
 				return KonfigData{}, err
 			}
-			log.Println("Error by Connect to Elastic Search", err)
+			logger.Get().Errorw("Error by Connect to Elastic Search:" + err.Error())
 		} else {
 			client = c
 			break
@@ -41,22 +40,22 @@ func NewElasticDb(url, esmapping string) (KonfigData, error) {
 		info, code, err := client.Ping(url).Do(ctx)
 		if err != nil {
 			time.Sleep(2 * time.Second)
-			log.Println("Error by Ping Try again to Find Elasticsearchdb")
+			logger.Get().Infow("Error by Ping Try again to Find Elasticsearchdb")
 			if i == 9 {
 				return KonfigData{}, err
 			}
 		} else {
-			fmt.Printf("Elasticsearch returned with code %d and version %s\n", code, info.Version.Number)
+			logger.Get().Infof("Elasticsearch returned with code %d and version %s\n", code, info.Version.Number)
 			break
 		}
 
 	}
 	esversion, err := client.ElasticsearchVersion(url)
 	if err != nil {
-		log.Println("Error by VersionQuestion")
+		logger.Get().Errorw("Error by VersionQuestion, return empty Handler: " + err.Error())
 		return KonfigData{}, err
 	}
-	fmt.Printf("Elasticsearch version %s\n", esversion)
+	logger.Get().Infof("Elasticsearch version %s\n", esversion)
 
 	// exists, err := client.IndexExists(index).Do(ctx)
 	// if err != nil {
@@ -104,7 +103,7 @@ func (k *KonfigData) AddStats(data StatsData, index string) {
 }
 
 func (k *KonfigData) AddLog(data LogData, index string) {
-	log.Println("logData from Client !!!", index)
+	logger.Get().Infow("logData from Client for index: " + index)
 
 	bulkRequest := k.dbClient.Bulk()
 	tmp := elastic.NewBulkIndexRequest().Index(index).Type(data.Type).Id(genID()).Doc(data)

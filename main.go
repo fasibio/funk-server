@@ -1,10 +1,11 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/fasibio/funk-server/logger"
 
 	"github.com/go-chi/chi"
 	"github.com/gorilla/websocket"
@@ -44,17 +45,18 @@ func main() {
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+		logger.Get().Errorw(err.Error())
 	}
 
 }
 
 func run(c *cli.Context) error {
-	log.Println("elasticSearchUrl", c.String("elasticSearchUrl"))
+	logger.Initialize("info")
+	logger.Get().Infow("elasticSearchUrl:" + c.String("elasticSearchUrl"))
 	db, err := NewElasticDb(c.String("elasticSearchUrl"), "")
 	port := c.String("port")
 	if err != nil {
-		panic(err)
+		logger.Get().Fatal(err)
 	}
 	handler := Handler{
 		connectionkey: c.String("connectionkey"),
@@ -68,8 +70,8 @@ func run(c *cli.Context) error {
 	router := chi.NewMux()
 	router.Get("/", handler.dataserviceHandler.Root)
 	router.HandleFunc("/data/subscribe", handler.dataserviceHandler.Subscribe)
-	log.Println("Starting at port ", port)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	logger.Get().Infow("Starting at port " + port)
+	logger.Get().Fatal(http.ListenAndServe(":"+port, router))
 	return nil
 
 }
@@ -83,7 +85,7 @@ func genUID() (string, error) {
 	flake := sonyflake.NewSonyflake(sonyflake.Settings{})
 	id, err := flake.NextID()
 	if err != nil {
-		log.Print("flake.NextID() failed with", err)
+		logger.Get().Errorw("flake.NextID() failed with" + err.Error())
 		return "", err
 	}
 	return strconv.FormatUint(id, 10), nil

@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
+	"github.com/fasibio/funk-server/logger"
 	"github.com/gorilla/websocket"
 )
 
@@ -23,16 +23,16 @@ func (u *DataServiceWebSocket) Root(w http.ResponseWriter, r *http.Request) {
 
 func (u *DataServiceWebSocket) Subscribe(w http.ResponseWriter, r *http.Request) {
 	if !u.ConnectionAllowed(r) {
-		log.Println("Connection forbidden")
+		logger.Get().Infow("Connection forbidden to subscribe")
 		w.WriteHeader(401)
 	}
-	log.Println("New Subscribe Client")
+	uuid, _ := u.genUID()
+	logger.Get().Infow("New Subscribe Client", "subscriptionID", uuid)
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Print("error by upgrade", err)
+		logger.Get().Errorw("error by Subscribe"+err.Error(), "subscriptionID", uuid)
 		return
 	}
-	uuid, _ := u.genUID()
 
 	go func() {
 		for {
@@ -40,7 +40,7 @@ func (u *DataServiceWebSocket) Subscribe(w http.ResponseWriter, r *http.Request)
 			err := c.ReadJSON(&messages)
 
 			if err != nil {
-				log.Println("error by ClientConn", err)
+				logger.Get().Errorw("error by ClientConn"+err.Error(), "subscriptionID", uuid)
 				delete(u.ClientConnections, uuid)
 				return
 			}
@@ -52,7 +52,7 @@ func (u *DataServiceWebSocket) Subscribe(w http.ResponseWriter, r *http.Request)
 				for _, v := range str {
 					err = json.Unmarshal([]byte(v), &d)
 					if err != nil {
-						log.Println(err)
+						logger.Get().Errorw("error by unmarshal data:"+err.Error(), "subscriptionID", uuid)
 						d = v
 					}
 
