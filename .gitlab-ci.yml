@@ -1,3 +1,13 @@
+ uploadSonarqube: 
+   image: ciricihq/gitlab-sonar-scanner
+   stage: sonarqube
+   script:
+     - sonar-scanner -Dsonar.projectKey=fasibio_funk_agent_$CI_COMMIT_REF_NAME -Dsonar.sources=. -Dsonar.host.url=https://sonar.server2.fasibio.de -Dsonar.login=$sonarqubelogin
+   only: 
+     - master
+   tags:
+     - dockerfasibio
+ 
  buildBin: 
     stage: buildBin
     only:
@@ -36,6 +46,7 @@
 
 
  stages:
+   - sonarqube
    - buildBin
    - buildImage
    - publish

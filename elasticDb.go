@@ -78,21 +78,17 @@ func NewElasticDb(url, esmapping string) (KonfigData, error) {
 }
 
 type StatsData struct {
-	Containername string      `json:"containername,omitempty"`
-	ContainerID   string      `json:"containerid,omitempty"`
-	Timestamp     time.Time   `json:"timestamp,omitempty"`
-	Host          string      `json:"host,omitempty"`
-	Type          string      `json:"-"`
-	Stats         interface{} `json:"stats,omitempty"`
+	Timestamp  time.Time   `json:"timestamp,omitempty"`
+	Type       string      `json:"-"`
+	Stats      interface{} `json:"stats,omitempty"`
+	Attributes Attributes  `json:"attr,omitempty"`
 }
 
 type LogData struct {
-	Containername string      `json:"containername,omitempty"`
-	ContainerID   string      `json:"containerid,omitempty"`
-	Timestamp     time.Time   `json:"timestamp,omitempty"`
-	Host          string      `json:"host,omitempty"`
-	Type          string      `json:"-"`
-	Logs          interface{} `json:"logs,omitempty"`
+	Timestamp  time.Time   `json:"timestamp,omitempty"`
+	Type       string      `json:"-,omitempty"`
+	Logs       interface{} `json:"logs,omitempty"`
+	Attributes Attributes  `json:"attr,omitempty"`
 }
 
 func (k *KonfigData) AddStats(data StatsData, index string) {
