@@ -59,23 +59,19 @@ func (u *DataServiceWebSocket) Subscribe(w http.ResponseWriter, r *http.Request)
 					switch msg.Type {
 					case MessageType_Log:
 						u.Db.AddLog(LogData{
-							Containername: msg.Containername,
-							Timestamp:     msg.Time,
-							Host:          msg.Host,
-							Type:          string(msg.Type),
-							Logs:          d,
-							ContainerID:   msg.ContainerID,
+							Timestamp:  msg.Time,
+							Type:       string(msg.Type),
+							Logs:       d,
+							Attributes: msg.Attributes,
 						}, msg.SearchIndex+"_funk")
 
 					case MessageType_Stats:
 						{
 							u.Db.AddStats(StatsData{
-								Containername: msg.Containername,
-								Timestamp:     msg.Time,
-								Host:          msg.Host,
-								Type:          string(msg.Type),
-								Stats:         d,
-								ContainerID:   msg.ContainerID,
+								Timestamp:  msg.Time,
+								Type:       string(msg.Type),
+								Stats:      d,
+								Attributes: msg.Attributes,
 							}, msg.SearchIndex+"_funk")
 						}
 					}
