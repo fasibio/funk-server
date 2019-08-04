@@ -65,7 +65,7 @@ func (u *DataServiceWebSocket) Subscribe(w http.ResponseWriter, r *http.Request)
 							Type:          string(msg.Type),
 							Logs:          d,
 							ContainerID:   msg.ContainerID,
-						}, msg.SearchIndex)
+						}, msg.SearchIndex+"_funk")
 
 					case MessageType_Stats:
 						{
@@ -76,7 +76,7 @@ func (u *DataServiceWebSocket) Subscribe(w http.ResponseWriter, r *http.Request)
 								Type:          string(msg.Type),
 								Stats:         d,
 								ContainerID:   msg.ContainerID,
-							}, msg.SearchIndex)
+							}, msg.SearchIndex+"_funk")
 						}
 					}
 				}

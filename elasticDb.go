@@ -95,6 +95,54 @@ type LogData struct {
 	Logs          interface{} `json:"logs,omitempty"`
 }
 
+func (k *KonfigData) setIlmPolicy(minAge string) error {
+
+	ilmservice := elastic.NewXPackIlmPutLifecycleService(k.dbClient)
+	ilmservice.Policy("funk_policy")
+	ilmservice.BodyString(`
+	{
+		"policy": {                       
+			"phases": {
+				"delete": {
+					"min_age": "` + minAge + `",           
+					"actions": {
+						"delete": {}              
+					}
+				}
+			}
+		}
+	}
+	`)
+	res, err := ilmservice.Do(k.ctx)
+	if err != nil {
+		return err
+	}
+	logger.Get().Infow("IlmPolicy Created ", "Acknowledged", res.Acknowledged)
+	return nil
+}
+
+func (k *KonfigData) setPolicyTemplate() error {
+	template := elastic.NewIndicesPutTemplateService(k.dbClient)
+	template.Name("funk_template")
+	template.BodyString(`
+	{
+		"index_patterns": ["*_funk"],                 
+		"settings": {
+			"number_of_shards": 1,
+			"number_of_replicas": 1,
+			"index.lifecycle.name": "funk_policy",      
+			"index.lifecycle.rollover_alias": "funk"    
+		}
+	}
+	`)
+	res, err := template.Do(k.ctx)
+	if err != nil {
+		return err
+	}
+	logger.Get().Infow("PolicyTemplate Created ", "Acknowledged", res.Acknowledged, "Index", res.Index)
+	return nil
+}
+
 func (k *KonfigData) AddStats(data StatsData, index string) {
 	bulkRequest := k.dbClient.Bulk()
 	tmp := elastic.NewBulkIndexRequest().Index(index).Type(data.Type).Id(genID()).Doc(data)

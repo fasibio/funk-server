@@ -42,6 +42,17 @@ func main() {
 			Value:  "changeMe04cf242924f6b5f96",
 			Usage:  "The connectionkey given to the funk_agent so he can connect",
 		},
+		cli.BoolTFlag{
+			Name:   "usedeletePolicy",
+			EnvVar: "USE_DELETE_POLICY",
+			Usage:  "Default is enabled it will set an ilm on funk indexes",
+		},
+		cli.StringFlag{
+			Name:   "minagedeletepolicy",
+			EnvVar: "MIN_AGE_DELETE_POLICY",
+			Value:  "90d",
+			Usage:  "Set the Date to delete data from the funk indexes",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -66,6 +77,15 @@ func run(c *cli.Context) error {
 			genUID:            genUID,
 		},
 	}
+	if c.BoolT("usedeletePolicy") {
+		if err := db.setIlmPolicy(c.String("minagedeletepolicy")); err != nil {
+			logger.Get().Fatalw("error create ilm policy: " + err.Error())
+		}
+		if err := db.setPolicyTemplate(); err != nil {
+			logger.Get().Fatalw("error set policy template: " + err.Error())
+		}
+	}
+
 	handler.dataserviceHandler.ConnectionAllowed = handler.ConnectionAllowed
 	router := chi.NewMux()
 	router.Get("/", handler.dataserviceHandler.Root)
