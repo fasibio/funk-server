@@ -1,0 +1,60 @@
+version: "3"
+
+services: 
+  funk-server: # the funk-server to collect all log information and write them to the elasticsearchdb 
+    networks: 
+      - elk
+    ports: 
+      - 3000:3000
+    image: fasibio/funk_server:14
+    environment: 
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      CONNECTION_KEY: changeMe7894561323 # Shared Key you have to set on each agent...
+    labels: 
+      "funk.log": "false" #do not log this container! IMPORTANT no ending loop!!! 
+  funk-agent: # the funk agent to collect the logs
+    networks: 
+      - elk
+    image: fasibio/funk_agent:24
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Its nesssari to talk with docker it self. Agent will not be running without this
+    environment:
+      FUNK_SERVER: ws://funk-server:3000 # the adress to the funk-server it can be external too
+      CONNECTION_KEY: changeMe7894561323 # The Shared Key configured at your funk-server installation
+    labels: 
+      "funk.searchindex": "funk_agent" # The index at your elasticseach db to collect logs from this container
+
+  kibana: #Your Kibanasystem
+    networks: 
+      - elk
+    ports:
+      - 5601:5601
+    image: docker.elastic.co/kibana/kibana:7.2.0
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    labels: 
+      "funk.searchindex": "kibana" # The index at your elasticseach db to collect logs from this container
+  elasticsearch:  #Your Elasticsearchdb
+    image: elasticsearch:7.2.0
+    ports: 
+      - 127.0.0.1:9200:9200
+      - 9300:9300
+    networks: 
+      - elk
+    environment: 
+      - discovery.type=single-node
+    labels: 
+      "funk.log": "false" #do not log this container
+
+  testhttpd: # An Example container. No JSON Logging... Call port 127.0.0.1:8080 to produce log entries
+    image: httpd
+    ports: 
+      - 8080:80
+    labels: 
+      "funk.searchindex": "httpd" # The index at your elasticseach db to collect logs from this container
+      "funk.log.formatRegex": "(?P<client_ip>(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])) - - \\[(?P<time>.*)\\] \"(?P<methode>GET|POST|PUT|DELETE).*\" (?P<status_code>[0-9]{3}).*" # No JSON so this regex will separate the messages into different values see the submatiching
+      "funk.log.stats": "false" # No statslogging
+
+networks:
+  elk:
+    external: true
