@@ -22,16 +22,34 @@ My Mindset ist:
 Hold everything near by your Code. 
 So with this solution you can define How and whats logging directly at you docker-compose or manifest over labels tag.
 
-## Getting Started (2min)
+## Getting Started (10min)
 
 ### Prerequisites
 
 Take a look at the [docker-compose.yml](./example/docker-compose.yml) and try it!
 It will start 5 Container.(funk-server, funk-agent, Kibana, elasticsearch, a test http container) 
 
+After a while of starttime open the browser at http://localhost:5601 . 
+Now go to Management at the Drawer Menu. 
+At Elasticsearch ==> Index Management you can find all generate Indexes. All ends with _funk
+
+At Kibana ==> Index Pattern ==> Create index pattern you can create an Index for example httpd_logs*. 
+Set Timeinformation and save. 
+Now you have an Index with all information of die Service. 
+
+Go to Discover at Drawermenu. 
+Here you can filter your logs now. 
+
+Repeat this for all Index you need Information. 
+
+
+
 If you want to find out more about the [funk-agent](https://github.com/fasibio/funk_agent)
 
+All other steps are normal Kibana steps. (Visualization, Dashboards, etc)
 
+
+Thats it! 
 ## Whats Stats info ?? 
 The [funk-agent](https://github.com/fasibio/funk_agent) can log stats info to give Information about Hardware Usage of each Container like CPU, Memory etc. 
 Be careful with this Information! It need many Space at your Elasticsearch db. You can take it off globally at your [funk-agent](https://github.com/fasibio/funk_agent) instaltion or configure for each Container.
