@@ -12,9 +12,9 @@ const (
 type Message struct {
 	Time        time.Time   `json:"time,omitempty"`
 	Type        MessageType `json:"type,omitempty"`
-	Data        []string    `json:"data,omitempty"`
-	SearchIndex string      `json:"searchindex,omitempty"`
-	Attributes  Attributes  `json:"attr,omitempty"`
+	Data        []string    `json:"data,omitempty"`        //a list of Stringjson with the explizit data
+	SearchIndex string      `json:"searchindex,omitempty"` //the elasticsearch index to set this data
+	Attributes  Attributes  `json:"attr,omitempty"`        // Meta information
 }
 
 type Attributes struct {

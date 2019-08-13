@@ -12,6 +12,7 @@ services:
       CONNECTION_KEY: changeMe7894561323 # Shared Key you have to set on each agent...
     labels: 
       "funk.log": "false" #do not log this container! IMPORTANT no ending loop!!! 
+
   funk-agent: # the funk agent to collect the logs
     networks: 
       - elk
@@ -19,7 +20,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # Its nesssari to talk with docker it self. Agent will not be running without this
     environment:
-      FUNK_SERVER: ws://funk-server:3000 # the adress to the funk-server it can be external too
+      FUNK_SERVER: ws://funk-server:3000 # the adress to the funk-server it can be external too (is a websocket so ws instance of http and wss instance of https)
       CONNECTION_KEY: changeMe7894561323 # The Shared Key configured at your funk-server installation
     labels: 
       "funk.searchindex": "funk_agent" # The index at your elasticseach db to collect logs from this container
@@ -34,6 +35,7 @@ services:
       ELASTICSEARCH_URL: http://elasticsearch:9200
     labels: 
       "funk.searchindex": "kibana" # The index at your elasticseach db to collect logs from this container
+      
   elasticsearch:  #Your Elasticsearchdb
     image: elasticsearch:7.2.0
     ports: 
