@@ -55,6 +55,17 @@ Thats it!
 The [funk-agent](https://github.com/fasibio/funk_agent) can log stats info to give Information about Hardware Usage of each Container like CPU, Memory etc. 
 Be careful with this Information! It need many Space at your Elasticsearch db. You can take it off globally at your [funk-agent](https://github.com/fasibio/funk_agent) instaltion or configure for each Container.
  
+# Hardware 
+Both Service are written with go. 
+So it need minimum space. 
+- Imagesize [funk-server](https://hub.docker.com/r/fasibio/funk_server): 14 MB
+
+- Imagesize [funk-agent](https://hub.docker.com/r/fasibio/funk_agent/tags): 13 MB
+
+- Mem usage funk-server: ~ 3 MB
+
+- Mem usage funk-agent: ~ 7 MB
+
 
 ## Possible Configuration
 
