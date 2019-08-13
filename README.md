@@ -39,6 +39,7 @@ Now you have an Index with all information of die Service.
 
 Go to Discover at Drawermenu. 
 Here you can filter your logs now. 
+Open a second Tab and go to http://127.0.0.1:8080 to create new Log entries
 
 Repeat this for all Index you need Information. 
 
