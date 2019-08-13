@@ -9,8 +9,6 @@ services:
     image: docker.elastic.co/kibana/kibana:7.2.0
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
-    labels: 
-     - "fasibiotracking.enabled=true"
   elasticsearch: 
     image: elasticsearch:7.2.0
     ports: 
@@ -20,8 +18,6 @@ services:
       - elk
     environment: 
       - discovery.type=single-node
-    labels: 
-     - "fasibiotracking.enabled=true"
 networks:
   elk:
     external: true
