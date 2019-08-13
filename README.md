@@ -7,12 +7,12 @@ It will be automatically collect all Data from all running Dockercontainer.
 ## Motivation
 
 ELK is the state of the art stack to collect Logmessages. 
-But 90% off all only need 1% of the possibilities of Logstash.
+But 90% only need 1% of the possibilities of Logstash.
 
 The normal modern way is: 
 
 You have an orchestration system like docker (swarm), kubernetes ...
-And want to collect the messages of all your Containers. [funk-agent](https://github.com/fasibio/funk_agent)
+And want to collect the messages of all your Containers. Solution: [funk-agent](https://github.com/fasibio/funk_agent)
 
 I also need a Solution to Manage the logs of different Cluster on different host different Provider at one Database. 
 So my Servercomponent have to be protected Publish. 
@@ -73,10 +73,12 @@ To see possible Configurations and available Labels for the container at [funk-a
 You can write your own Clients... for spezial problems. 
 
 Its a Websocketconnection...
+
 Path: /data/subscribe
+
 Header ```funk.connection``` should be the CONNECTION_KEY
 
-Dataformat: 
+## Dataformat: 
 Look add the [Message struct](./types.go)
 Your Logdata will be set on data as json string
 
