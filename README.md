@@ -29,16 +29,22 @@ So with this solution you can define How and whats logging directly at you docke
 Take a look at the [docker-compose.yml](./example/docker-compose.yml) and try it!
 It will start 5 Container.(funk-server, funk-agent, Kibana, elasticsearch, a test http container) 
 
-After a while of starttime open the browser at http://localhost:5601 . 
+After a while of starttime open the browser at http://localhost:5601.
+
 Now go to Management at the Drawer Menu. 
+
 At Elasticsearch ==> Index Management you can find all generate Indexes. All ends with _funk
 
 At Kibana ==> Index Pattern ==> Create index pattern you can create an Index for example httpd_logs*. 
+
 Set Timeinformation and save. 
-Now you have an Index with all information of die Service. 
+
+Now you have an Index with all information of this Service. 
 
 Go to Discover at Drawermenu. 
+
 Here you can filter your logs now. 
+
 Open a second Tab and go to http://127.0.0.1:8080 to create new Log entries
 
 Repeat this for all Index you need Information. 
@@ -51,6 +57,7 @@ All other steps are normal Kibana steps. (Visualization, Dashboards, etc)
 
 
 Thats it! 
+
 ## Whats Stats info ?? 
 The [funk-agent](https://github.com/fasibio/funk_agent) can log stats info to give Information about Hardware Usage of each Container like CPU, Memory etc. 
 Be careful with this Information! It need many Space at your Elasticsearch db. You can take it off globally at your [funk-agent](https://github.com/fasibio/funk_agent) instaltion or configure for each Container.
@@ -100,7 +107,7 @@ You have to send a list of Message as json to the server.
 # Other Clients
 
 A list of all non Docker clients: 
-- [funk js agent](https://github.com/fasibio/funk-js-agent) ==> An Agent to call direkt from your javascript/node application to funk server (WIP)
+- [funk js agent](https://github.com/fasibio/funk-js-agent) ==> An Agent to call direkt from your javascript/node application to funk server
 
 
 If you have trouble or need help. Please feel free to oben an issue. 
