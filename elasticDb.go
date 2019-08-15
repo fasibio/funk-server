@@ -91,7 +91,7 @@ type LogData struct {
 	Attributes Attributes  `json:"attr,omitempty"`
 }
 
-func (k *KonfigData) setIlmPolicy(minAge string) error {
+func (k *KonfigData) setIlmPolicy(minDeleteAge string) error {
 
 	ilmservice := elastic.NewXPackIlmPutLifecycleService(k.dbClient)
 	ilmservice.Policy("funk_policy")
@@ -100,7 +100,7 @@ func (k *KonfigData) setIlmPolicy(minAge string) error {
 		"policy": {                       
 			"phases": {
 				"delete": {
-					"min_age": "` + minAge + `",           
+					"min_age": "` + minDeleteAge + `",           
 					"actions": {
 						"delete": {}              
 					}
@@ -108,12 +108,14 @@ func (k *KonfigData) setIlmPolicy(minAge string) error {
 			}
 		}
 	}
+	
 	`)
 	res, err := ilmservice.Do(k.ctx)
 	if err != nil {
 		return err
 	}
 	logger.Get().Infow("IlmPolicy Created ", "Acknowledged", res.Acknowledged)
+
 	return nil
 }
 
@@ -122,7 +124,7 @@ func (k *KonfigData) setPolicyTemplate() error {
 	template.Name("funk_template")
 	template.BodyString(`
 	{
-		"index_patterns": ["*_funk"],                 
+		"index_patterns": ["*_funk*"],                 
 		"settings": {
 			"number_of_shards": 1,
 			"number_of_replicas": 1,
@@ -131,6 +133,7 @@ func (k *KonfigData) setPolicyTemplate() error {
 		}
 	}
 	`)
+
 	res, err := template.Do(k.ctx)
 	if err != nil {
 		return err
@@ -143,7 +146,11 @@ func (k *KonfigData) AddStats(data StatsData, index string) {
 	bulkRequest := k.dbClient.Bulk()
 	tmp := elastic.NewBulkIndexRequest().Index(index).Type(data.Type).Id(genID()).Doc(data)
 	bulkRequest.Add(tmp)
-	bulkRequest.Do(k.ctx)
+	_, err := bulkRequest.Do(k.ctx)
+	if err != nil {
+		logger.Get().Warn("Error by create Document", err)
+	}
+
 }
 
 func (k *KonfigData) AddLog(data LogData, index string) {
@@ -152,5 +159,9 @@ func (k *KonfigData) AddLog(data LogData, index string) {
 	bulkRequest := k.dbClient.Bulk()
 	tmp := elastic.NewBulkIndexRequest().Index(index).Type(data.Type).Id(genID()).Doc(data)
 	bulkRequest.Add(tmp)
-	bulkRequest.Do(k.ctx)
+	_, err := bulkRequest.Do(k.ctx)
+	if err != nil {
+		logger.Get().Warn("Error by create Document", err)
+	}
+
 }

@@ -14,7 +14,7 @@
      - master
     tags:
       - dockerfasibio
-    image: golang:1.11.9-alpine3.9
+    image: golang:1.12.8-alpine3.9
     script: 
       - apk add make
       - GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build -mod vendor -a -installsuffix cgo -o funk_server .

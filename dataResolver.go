@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/fasibio/funk-server/logger"
 	"github.com/gorilla/websocket"
@@ -19,6 +20,10 @@ type DataServiceWebSocket struct {
 
 func (u *DataServiceWebSocket) Root(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hallo vom Server"))
+}
+
+func getIndexDate(time time.Time) string {
+	return time.Format("2006-01-02")
 }
 
 func (u *DataServiceWebSocket) Subscribe(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +68,7 @@ func (u *DataServiceWebSocket) Subscribe(w http.ResponseWriter, r *http.Request)
 							Type:       string(msg.Type),
 							Logs:       d,
 							Attributes: msg.Attributes,
-						}, msg.SearchIndex+"_funk")
+						}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now()))
 
 					case MessageType_Stats:
 						{
@@ -72,7 +77,7 @@ func (u *DataServiceWebSocket) Subscribe(w http.ResponseWriter, r *http.Request)
 								Type:       string(msg.Type),
 								Stats:      d,
 								Attributes: msg.Attributes,
-							}, msg.SearchIndex+"_funk")
+							}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now()))
 						}
 					}
 				}
