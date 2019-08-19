@@ -33,6 +33,41 @@ func getLoggerWithSubscriptionID(logs *zap.SugaredLogger, uuid string) *zap.Suga
 	)
 }
 
+func (u *DataServiceWebSocket) interpretMessage(messages []Message, logs *zap.SugaredLogger) {
+	for _, msg := range messages {
+		str := msg.Data
+		var d interface{}
+
+		for _, v := range str {
+			err := json.Unmarshal([]byte(v), &d)
+			if err != nil {
+				logs.Errorw("error by unmarshal data:" + err.Error())
+				d = v
+			}
+
+			switch msg.Type {
+			case MessageType_Log:
+				u.Db.AddLog(LogData{
+					Timestamp:  msg.Time,
+					Type:       string(msg.Type),
+					Logs:       d,
+					Attributes: msg.Attributes,
+				}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now()))
+
+			case MessageType_Stats:
+				{
+					u.Db.AddStats(StatsData{
+						Timestamp:  msg.Time,
+						Type:       string(msg.Type),
+						Stats:      d,
+						Attributes: msg.Attributes,
+					}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now()))
+				}
+			}
+		}
+	}
+}
+
 func (u *DataServiceWebSocket) messageSubscribeHandler(uuid string, c *websocket.Conn) {
 	logs := getLoggerWithSubscriptionID(logger.Get(), uuid)
 	for {
@@ -45,38 +80,7 @@ func (u *DataServiceWebSocket) messageSubscribeHandler(uuid string, c *websocket
 			return
 		}
 
-		for _, msg := range messages {
-			str := msg.Data
-			var d interface{}
-
-			for _, v := range str {
-				err = json.Unmarshal([]byte(v), &d)
-				if err != nil {
-					logs.Errorw("error by unmarshal data:" + err.Error())
-					d = v
-				}
-
-				switch msg.Type {
-				case MessageType_Log:
-					u.Db.AddLog(LogData{
-						Timestamp:  msg.Time,
-						Type:       string(msg.Type),
-						Logs:       d,
-						Attributes: msg.Attributes,
-					}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now()))
-
-				case MessageType_Stats:
-					{
-						u.Db.AddStats(StatsData{
-							Timestamp:  msg.Time,
-							Type:       string(msg.Type),
-							Stats:      d,
-							Attributes: msg.Attributes,
-						}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now()))
-					}
-				}
-			}
-		}
+		u.interpretMessage(messages, logs)
 	}
 }
 
