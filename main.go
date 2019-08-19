@@ -18,6 +18,14 @@ type Handler struct {
 	connectionkey      string
 }
 
+const (
+	HTTP_PORT             = "port"
+	ELASTICSEARCH_URL     = "elasticSearchUrl"
+	CONNECTION_KEY        = "connectionkey"
+	USE_DELETE_POLICY     = "usedeletePolicy"
+	MIN_AGE_DELETE_POLICY = "minagedeletepolicy"
+)
+
 func main() {
 
 	app := cli.NewApp()
@@ -25,30 +33,30 @@ func main() {
 	app.Action = run
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name:   "port, p",
+			Name:   HTTP_PORT + ", p",
 			EnvVar: "HTTP_PORT",
 			Value:  "3000",
 			Usage:  "`HTTP_PORT` to start the server on",
 		},
 		cli.StringFlag{
-			Name:   "elasticSearchUrl",
+			Name:   ELASTICSEARCH_URL,
 			EnvVar: "ELASTICSEARCH_URL",
 			Value:  "http://127.0.0.1:9200",
 			Usage:  "Elasticsearch url",
 		},
 		cli.StringFlag{
-			Name:   "connectionkey",
+			Name:   CONNECTION_KEY,
 			EnvVar: "CONNECTION_KEY",
 			Value:  "changeMe04cf242924f6b5f96",
 			Usage:  "The connectionkey given to the funk_agent so he can connect",
 		},
 		cli.BoolTFlag{
-			Name:   "usedeletePolicy",
+			Name:   USE_DELETE_POLICY,
 			EnvVar: "USE_DELETE_POLICY",
 			Usage:  "Default is enabled it will set an ilm on funk indexes",
 		},
 		cli.StringFlag{
-			Name:   "minagedeletepolicy",
+			Name:   MIN_AGE_DELETE_POLICY,
 			EnvVar: "MIN_AGE_DELETE_POLICY",
 			Value:  "90d",
 			Usage:  "Set the Date to delete data from the funk indexes",
@@ -63,22 +71,22 @@ func main() {
 
 func run(c *cli.Context) error {
 	logger.Initialize("info")
-	logger.Get().Infow("elasticSearchUrl:" + c.String("elasticSearchUrl"))
-	db, err := NewElasticDb(c.String("elasticSearchUrl"), "")
-	port := c.String("port")
+	logger.Get().Infow("elasticSearchUrl:" + c.String(ELASTICSEARCH_URL))
+	db, err := NewElasticDb(c.String(ELASTICSEARCH_URL), "")
+	port := c.String(HTTP_PORT)
 	if err != nil {
 		logger.Get().Fatal(err)
 	}
 	handler := Handler{
-		connectionkey: c.String("connectionkey"),
+		connectionkey: c.String(CONNECTION_KEY),
 		dataserviceHandler: &DataServiceWebSocket{
 			Db:                &db,
 			ClientConnections: make(map[string]*websocket.Conn),
 			genUID:            genUID,
 		},
 	}
-	if c.BoolT("usedeletePolicy") {
-		if err := db.setIlmPolicy(c.String("minagedeletepolicy")); err != nil {
+	if c.BoolT(USE_DELETE_POLICY) {
+		if err := db.setIlmPolicy(c.String(MIN_AGE_DELETE_POLICY)); err != nil {
 			logger.Get().Fatalw("error create ilm policy: " + err.Error())
 		}
 		if err := db.setPolicyTemplate(); err != nil {

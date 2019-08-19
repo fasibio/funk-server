@@ -7,6 +7,7 @@ import (
 
 	"github.com/fasibio/funk-server/logger"
 	"github.com/gorilla/websocket"
+	"go.uber.org/zap"
 )
 
 var upgrader = websocket.Upgrader{} // use default options
@@ -26,64 +27,74 @@ func getIndexDate(time time.Time) string {
 	return time.Format("2006-01-02")
 }
 
+func getLoggerWithSubscriptionID(logs *zap.SugaredLogger, uuid string) *zap.SugaredLogger {
+	return logs.With(
+		"subscriptionID", uuid,
+	)
+}
+
+func (u *DataServiceWebSocket) messageSubscribeHandler(uuid string, c *websocket.Conn) {
+	logs := getLoggerWithSubscriptionID(logger.Get(), uuid)
+	for {
+		var messages []Message
+		err := c.ReadJSON(&messages)
+
+		if err != nil {
+			logs.Errorw("error by ClientConn" + err.Error())
+			delete(u.ClientConnections, uuid)
+			return
+		}
+
+		for _, msg := range messages {
+			str := msg.Data
+			var d interface{}
+
+			for _, v := range str {
+				err = json.Unmarshal([]byte(v), &d)
+				if err != nil {
+					logs.Errorw("error by unmarshal data:" + err.Error())
+					d = v
+				}
+
+				switch msg.Type {
+				case MessageType_Log:
+					u.Db.AddLog(LogData{
+						Timestamp:  msg.Time,
+						Type:       string(msg.Type),
+						Logs:       d,
+						Attributes: msg.Attributes,
+					}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now()))
+
+				case MessageType_Stats:
+					{
+						u.Db.AddStats(StatsData{
+							Timestamp:  msg.Time,
+							Type:       string(msg.Type),
+							Stats:      d,
+							Attributes: msg.Attributes,
+						}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now()))
+					}
+				}
+			}
+		}
+	}
+}
+
 func (u *DataServiceWebSocket) Subscribe(w http.ResponseWriter, r *http.Request) {
 	if !u.ConnectionAllowed(r) {
 		logger.Get().Infow("Connection forbidden to subscribe")
 		w.WriteHeader(401)
 	}
 	uuid, _ := u.genUID()
-	logger.Get().Infow("New Subscribe Client", "subscriptionID", uuid)
+	logs := getLoggerWithSubscriptionID(logger.Get(), uuid)
+	logs.Infow("New Subscribe Client")
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		logger.Get().Errorw("error by Subscribe"+err.Error(), "subscriptionID", uuid)
+		logs.Errorw("error by Subscribe" + err.Error())
 		return
 	}
 
-	go func() {
-		for {
-			var messages []Message
-			err := c.ReadJSON(&messages)
-
-			if err != nil {
-				logger.Get().Errorw("error by ClientConn"+err.Error(), "subscriptionID", uuid)
-				delete(u.ClientConnections, uuid)
-				return
-			}
-
-			for _, msg := range messages {
-				str := msg.Data
-				var d interface{}
-
-				for _, v := range str {
-					err = json.Unmarshal([]byte(v), &d)
-					if err != nil {
-						logger.Get().Errorw("error by unmarshal data:"+err.Error(), "subscriptionID", uuid)
-						d = v
-					}
-
-					switch msg.Type {
-					case MessageType_Log:
-						u.Db.AddLog(LogData{
-							Timestamp:  msg.Time,
-							Type:       string(msg.Type),
-							Logs:       d,
-							Attributes: msg.Attributes,
-						}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now()))
-
-					case MessageType_Stats:
-						{
-							u.Db.AddStats(StatsData{
-								Timestamp:  msg.Time,
-								Type:       string(msg.Type),
-								Stats:      d,
-								Attributes: msg.Attributes,
-							}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now()))
-						}
-					}
-				}
-			}
-		}
-	}()
+	go u.messageSubscribeHandler(uuid, c)
 
 	u.ClientConnections[uuid] = c
 
