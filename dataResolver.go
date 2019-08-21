@@ -15,7 +15,7 @@ var upgrader = websocket.Upgrader{} // use default options
 type DataServiceWebSocket struct {
 	ClientConnections map[string]*websocket.Conn
 	genUID            func() (string, error)
-	Db                *KonfigData
+	Db                ElsticConnection
 	ConnectionAllowed func(*http.Request) bool
 }
 
@@ -44,7 +44,6 @@ func (u *DataServiceWebSocket) interpretMessage(messages []Message, logs *zap.Su
 				logs.Errorw("error by unmarshal data:" + err.Error())
 				d = v
 			}
-
 			switch msg.Type {
 			case MessageType_Log:
 				u.Db.AddLog(LogData{
@@ -73,7 +72,6 @@ func (u *DataServiceWebSocket) messageSubscribeHandler(uuid string, c *websocket
 	for {
 		var messages []Message
 		err := c.ReadJSON(&messages)
-
 		if err != nil {
 			logs.Errorw("error by ClientConn" + err.Error())
 			delete(u.ClientConnections, uuid)
@@ -88,6 +86,7 @@ func (u *DataServiceWebSocket) Subscribe(w http.ResponseWriter, r *http.Request)
 	if !u.ConnectionAllowed(r) {
 		logger.Get().Infow("Connection forbidden to subscribe")
 		w.WriteHeader(401)
+		return
 	}
 	uuid, _ := u.genUID()
 	logs := getLoggerWithSubscriptionID(logger.Get(), uuid)
@@ -101,5 +100,4 @@ func (u *DataServiceWebSocket) Subscribe(w http.ResponseWriter, r *http.Request)
 	go u.messageSubscribeHandler(uuid, c)
 
 	u.ClientConnections[uuid] = c
-
 }

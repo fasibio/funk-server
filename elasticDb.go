@@ -15,6 +15,11 @@ type KonfigData struct {
 	mapping  string
 }
 
+type ElsticConnection interface {
+	AddStats(data StatsData, index string)
+	AddLog(data LogData, index string)
+}
+
 func genID() string {
 	id := ksuid.New()
 	return id.String()
