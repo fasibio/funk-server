@@ -8,6 +8,7 @@ require (
 	github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e // indirect
 	github.com/olivere/elastic v6.2.21+incompatible
 	github.com/pkg/errors v0.8.1 // indirect
+	github.com/posener/wstest v0.0.0-20180217133618-28272a7ea048
 	github.com/segmentio/ksuid v1.0.2
 	github.com/sony/sonyflake v1.0.0
 	github.com/urfave/cli v1.20.0
