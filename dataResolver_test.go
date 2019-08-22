@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -39,6 +38,7 @@ func TestDataServiceWebSocket_SubscribeTestThatAbortByConnectionNotAllowed(t *te
 		want                    int
 		wantConnectionSize      int
 		getMessageObjToSend     func() Message
+		breakAfterStauscheck    bool
 	}
 
 	data := []test{
@@ -60,13 +60,16 @@ func TestDataServiceWebSocket_SubscribeTestThatAbortByConnectionNotAllowed(t *te
 					},
 				}
 			},
+			breakAfterStauscheck: false,
 		},
-		// test{
-		// 	name:                    "ConnectionAllowed returned disallow connection so no connection will be open ",
-		// 	connectionAllowedResult: false,
-		// 	want:                    401,
-		// 	wantConnectionSize:      0,
-		// },
+		test{
+			name:                    "ConnectionAllowed returned disallow connection so no connection will be open ",
+			connectionAllowedResult: false,
+			want:                    401,
+			wantConnectionSize:      0,
+			getMessageObjToSend:     func() Message { return Message{} },
+			breakAfterStauscheck:    true,
+		},
 	}
 
 	const mockHeaderKey = "connectionAllowedResult"
@@ -93,6 +96,9 @@ func TestDataServiceWebSocket_SubscribeTestThatAbortByConnectionNotAllowed(t *te
 		if one.want != resp.StatusCode {
 			t.Errorf("Error by Status want %v got %v", one.want, resp.StatusCode)
 		}
+		if one.breakAfterStauscheck {
+			break
+		}
 
 		err := c.WriteJSON([]Message{one.getMessageObjToSend()})
 		if err != nil {
@@ -105,9 +111,5 @@ func TestDataServiceWebSocket_SubscribeTestThatAbortByConnectionNotAllowed(t *te
 		if len(dataserverholder.ClientConnections) != one.wantConnectionSize {
 			t.Errorf("Error by ClientConnections want %v got %v connections", one.wantConnectionSize, len(dataserverholder.ClientConnections))
 		}
-
-		log.Println(resp.Status)
-
 	}
-
 }
