@@ -7,7 +7,7 @@
     - dockerfasibio
   image: golang:1.12.8-alpine3.9
   script:
-    - go test -short -coverprofile=cov.out
+    - go test -mod=vendor -short -coverprofile=cov.out
   artifacts: 
     paths: 
       - ./cov.out
