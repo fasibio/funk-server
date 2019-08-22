@@ -25,7 +25,10 @@ func (db *DBMock) AddLog(data LogData, index string) {
 }
 
 func (db *DBMock) AddStats(data StatsData, index string) {
-
+	if !reflect.DeepEqual(db.wantMessage.Attributes, data.Attributes) {
+		db.t.Errorf("DB and want attributes are not equals want %v got %v", db.wantMessage.Attributes, data.Attributes)
+	}
+	db.tisExecute = true
 }
 func TestDataServiceWebSocket_SubscribeTestThatAbortByConnectionNotAllowed(t *testing.T) {
 	mocktime, err := time.Parse("2006-01-02", "2019-06-02")
@@ -43,7 +46,7 @@ func TestDataServiceWebSocket_SubscribeTestThatAbortByConnectionNotAllowed(t *te
 
 	data := []test{
 		test{
-			name:                    "ConnectionAllowed returned allow connection so connection will be open",
+			name:                    "ConnectionAllowed returned allow connection so connection will be open and log message will be send",
 			connectionAllowedResult: true,
 			want:                    101,
 			wantConnectionSize:      1,
@@ -51,6 +54,26 @@ func TestDataServiceWebSocket_SubscribeTestThatAbortByConnectionNotAllowed(t *te
 				return Message{
 					Time: mocktime,
 					Type: MessageType_Log,
+					Data: []string{
+						"{\"test\":\"test\"",
+					},
+					SearchIndex: "testindex",
+					Attributes: Attributes{
+						Host: "local.test",
+					},
+				}
+			},
+			breakAfterStauscheck: false,
+		},
+		test{
+			name:                    "ConnectionAllowed returned allow connection so connection will be open and statsmessage will be send",
+			connectionAllowedResult: true,
+			want:                    101,
+			wantConnectionSize:      1,
+			getMessageObjToSend: func() Message {
+				return Message{
+					Time: mocktime,
+					Type: MessageType_Stats,
 					Data: []string{
 						"{\"test\":\"test\"",
 					},
@@ -111,5 +134,29 @@ func TestDataServiceWebSocket_SubscribeTestThatAbortByConnectionNotAllowed(t *te
 		if len(dataserverholder.ClientConnections) != one.wantConnectionSize {
 			t.Errorf("Error by ClientConnections want %v got %v connections", one.wantConnectionSize, len(dataserverholder.ClientConnections))
 		}
+	}
+}
+
+func Test_getIndexDate(t *testing.T) {
+	tests := []struct {
+		name string
+		time func() time.Time
+		want string
+	}{
+		{
+			name: "Returns 2016-01-02",
+			time: func() time.Time {
+				res, _ := time.Parse("2006-01-02", "2016-01-02")
+				return res
+			},
+			want: "2016-01-02",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getIndexDate(tt.time()); got != tt.want {
+				t.Errorf("getIndexDate() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

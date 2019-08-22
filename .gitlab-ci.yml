@@ -1,3 +1,18 @@
+ 
+ test:
+  stage: test
+  only:
+    - master
+  tags: 
+    - dockerfasibio
+  image: golang:1.12.8-alpine3.9
+  script:
+    - go test -short -coverprofile=cov.out
+  artifacts: 
+  paths: 
+    - ./cov.out
+
+ 
  uploadSonarqube: 
    image: ciricihq/gitlab-sonar-scanner
    stage: sonarqube
@@ -7,6 +22,9 @@
      - master
    tags:
      - dockerfasibio
+   artifacts: 
+     paths: 
+       - ./cov.out
  
  buildBin: 
     stage: buildBin
@@ -46,6 +64,7 @@
 
 
  stages:
+   - test
    - sonarqube
    - buildBin
    - buildImage
