@@ -1,4 +1,6 @@
 # Funk-Server
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Ffasibio%2Ffunk-server.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Ffasibio%2Ffunk-server?ref=badge_shield)
+
 
 
 Funk is an simple to use Logging Collector to get your logs to the Elasticsearch Database and visible it with Kibana.
@@ -111,3 +113,6 @@ A list of all non Docker clients:
 
 
 If you have trouble or need help. Please feel free to oben an issue. 
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Ffasibio%2Ffunk-server.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Ffasibio%2Ffunk-server?ref=badge_large)
