@@ -5,9 +5,8 @@
     - master
   tags: 
     - dockerfasibio
-  image: golang:1.12.8-alpine3.9
+  image: golang:1.12.8
   script:
-    - apk add gcc
     - go test -mod=vendor -short -coverprofile=cov.out
   artifacts: 
     paths: 
