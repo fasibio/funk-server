@@ -9,8 +9,8 @@
   script:
     - go test -short -coverprofile=cov.out
   artifacts: 
-  paths: 
-    - ./cov.out
+    paths: 
+      - ./cov.out
 
  
  uploadSonarqube: 
