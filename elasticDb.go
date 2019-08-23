@@ -98,11 +98,8 @@ type LogData struct {
 	Attributes Attributes  `json:"attr,omitempty"`
 }
 
-func (k *KonfigData) SetIlmPolicy(minDeleteAge string) error {
-
-	ilmservice := elastic.NewXPackIlmPutLifecycleService(k.dbClient)
-	ilmservice.Policy("funk_policy")
-	ilmservice.BodyString(`
+func getIlmPolicyBody(minDeleteAge string) string {
+	return `
 	{
 		"policy": {                       
 			"phases": {
@@ -116,7 +113,14 @@ func (k *KonfigData) SetIlmPolicy(minDeleteAge string) error {
 		}
 	}
 	
-	`)
+	`
+}
+
+func (k *KonfigData) SetIlmPolicy(minDeleteAge string) error {
+
+	ilmservice := elastic.NewXPackIlmPutLifecycleService(k.dbClient)
+	ilmservice.Policy("funk_policy")
+	ilmservice.BodyString(getIlmPolicyBody(minDeleteAge))
 	res, err := ilmservice.Do(k.ctx)
 	if err != nil {
 		return err
@@ -126,10 +130,8 @@ func (k *KonfigData) SetIlmPolicy(minDeleteAge string) error {
 	return nil
 }
 
-func (k *KonfigData) SetPolicyTemplate() error {
-	template := elastic.NewIndicesPutTemplateService(k.dbClient)
-	template.Name("funk_template")
-	template.BodyString(`
+func getPolicyTemplateBody() string {
+	return `
 	{
 		"index_patterns": ["*_funk*"],                 
 		"settings": {
@@ -139,7 +141,13 @@ func (k *KonfigData) SetPolicyTemplate() error {
 			"index.lifecycle.rollover_alias": "funk"    
 		}
 	}
-	`)
+	`
+}
+
+func (k *KonfigData) SetPolicyTemplate() error {
+	template := elastic.NewIndicesPutTemplateService(k.dbClient)
+	template.Name("funk_template")
+	template.BodyString(getPolicyTemplateBody())
 
 	res, err := template.Do(k.ctx)
 	if err != nil {

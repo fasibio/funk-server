@@ -3,6 +3,8 @@ module github.com/fasibio/funk-server
 go 1.12
 
 require (
+	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible // indirect
+	github.com/bradleyjkemp/cupaloy/v2 v2.5.0
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/gorilla/websocket v1.4.0
 	github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e // indirect
