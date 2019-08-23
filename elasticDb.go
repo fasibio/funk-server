@@ -18,6 +18,8 @@ type KonfigData struct {
 type ElsticConnection interface {
 	AddStats(data StatsData, index string)
 	AddLog(data LogData, index string)
+	SetIlmPolicy(minDeleteAge string) error
+	SetPolicyTemplate() error
 }
 
 func genID() string {
@@ -96,7 +98,7 @@ type LogData struct {
 	Attributes Attributes  `json:"attr,omitempty"`
 }
 
-func (k *KonfigData) setIlmPolicy(minDeleteAge string) error {
+func (k *KonfigData) SetIlmPolicy(minDeleteAge string) error {
 
 	ilmservice := elastic.NewXPackIlmPutLifecycleService(k.dbClient)
 	ilmservice.Policy("funk_policy")
@@ -124,7 +126,7 @@ func (k *KonfigData) setIlmPolicy(minDeleteAge string) error {
 	return nil
 }
 
-func (k *KonfigData) setPolicyTemplate() error {
+func (k *KonfigData) SetPolicyTemplate() error {
 	template := elastic.NewIndicesPutTemplateService(k.dbClient)
 	template.Name("funk_template")
 	template.BodyString(`

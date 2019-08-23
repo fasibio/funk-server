@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -42,6 +44,125 @@ func TestHandler_ConnectionAllowed(t *testing.T) {
 		if one.want != result {
 			t.Errorf("ConnectionAllowed error by %v want allowed: %v but got %v", one.name, one.want, result)
 		}
+	}
+
+}
+
+func Test_genUID(t *testing.T) {
+	res, err := genUID()
+	if err != nil {
+		t.Fatalf("Error: %v by genUID", err.Error())
+	}
+	if len(res) != 18 {
+		t.Errorf("genUID have to generate a %v sing long uid but got %v", 18, len(res))
+	}
+}
+
+type IlmPolicyDBMock struct {
+	t                             *testing.T
+	setIlmPolicyReturnsError      bool
+	ilmPolicyReturnsDeleteAge     string
+	setPolicyTemplateReturnsError bool
+	isExecute                     []bool
+}
+
+func (db *IlmPolicyDBMock) AddLog(data LogData, index string) {
+}
+
+func (db *IlmPolicyDBMock) AddStats(data StatsData, index string) {
+}
+
+func (db *IlmPolicyDBMock) SetIlmPolicy(minDeleteAge string) error {
+	db.isExecute[0] = true
+	if db.setIlmPolicyReturnsError {
+		return errors.New("Mock Error but error")
+	}
+	if db.ilmPolicyReturnsDeleteAge != minDeleteAge {
+		db.t.Errorf("SetIlmPolicy Want deleteage %v but got %v", db.ilmPolicyReturnsDeleteAge, minDeleteAge)
+	}
+	return nil
+}
+
+func (db *IlmPolicyDBMock) SetPolicyTemplate() error {
+	if db.setPolicyTemplateReturnsError {
+		return errors.New("Mock Error but error")
+	}
+	return nil
+}
+func Test_setIlmPolicy(t *testing.T) {
+	tests := []struct {
+		name                          string
+		setIlmPolicyReturnsError      bool
+		setPolicyTemplateReturnsError bool
+		minAgeDeletePolicy            string
+	}{
+		{
+			name:                          "Call and no error will be fallen minAge = 20d",
+			setIlmPolicyReturnsError:      false,
+			setPolicyTemplateReturnsError: false,
+			minAgeDeletePolicy:            "20d",
+		},
+		{
+			name:                          "Call and error will be fallen minAge = 20d",
+			setIlmPolicyReturnsError:      true,
+			setPolicyTemplateReturnsError: true,
+			minAgeDeletePolicy:            "20d",
+		},
+		{
+			name:                          "Call and error will be fallen from setPolicyTemplateReturnsError minAge = 20d",
+			setIlmPolicyReturnsError:      false,
+			setPolicyTemplateReturnsError: true,
+			minAgeDeletePolicy:            "20d",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db := IlmPolicyDBMock{
+				t:                             t,
+				setIlmPolicyReturnsError:      tt.setIlmPolicyReturnsError,
+				setPolicyTemplateReturnsError: tt.setPolicyTemplateReturnsError,
+				isExecute:                     make([]bool, 2),
+				ilmPolicyReturnsDeleteAge:     tt.minAgeDeletePolicy,
+			}
+			err := setIlmPolicy(&db, tt.minAgeDeletePolicy)
+			if err != nil && !tt.setIlmPolicyReturnsError && !tt.setPolicyTemplateReturnsError {
+				t.Error("Got error but all error mocks are set to false")
+			}
+			if !db.isExecute[0] && !db.isExecute[1] {
+				t.Errorf("Mockfunctions was not been called... so db will not be execute")
+			}
+		})
+	}
+}
+
+type ResolverMock struct{}
+
+func (rolv *ResolverMock) Root(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusAccepted)
+}
+func (rolv *ResolverMock) Subscribe(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
+
+func Test_registerHandler(t *testing.T) {
+	resolver := ResolverMock{}
+	handler := registerHandler(&resolver)
+	server := httptest.NewServer(handler)
+	defer server.Close()
+	res, err := http.Get(server.URL)
+	if err != nil {
+		t.Errorf("Get Error by call server %v", err)
+	}
+	if res.StatusCode != http.StatusAccepted {
+		t.Errorf("Want to call Rootmock but statuscode is incorrect want %v got %v", http.StatusAccepted, res.StatusCode)
+	}
+
+	res, err = http.Get(server.URL + "/data/subscribe")
+	if err != nil {
+		t.Errorf("Get Error by call server %v", err)
+	}
+	if res.StatusCode != http.StatusOK {
+		t.Errorf("Want to call Subscribe but statuscode is incorrect want %v got %v", http.StatusAccepted, res.StatusCode)
 	}
 
 }

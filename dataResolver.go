@@ -19,6 +19,11 @@ type DataServiceWebSocket struct {
 	ConnectionAllowed func(*http.Request) bool
 }
 
+type Resolver interface {
+	Root(w http.ResponseWriter, r *http.Request)
+	Subscribe(w http.ResponseWriter, r *http.Request)
+}
+
 func (u *DataServiceWebSocket) Root(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hallo vom Server"))
 }

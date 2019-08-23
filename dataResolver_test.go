@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"strconv"
 	"testing"
@@ -30,7 +31,34 @@ func (db *DBMock) AddStats(data StatsData, index string) {
 	}
 	db.tisExecute = true
 }
-func TestDataServiceWebSocket_SubscribeTestThatAbortByConnectionNotAllowed(t *testing.T) {
+
+func (db *DBMock) SetIlmPolicy(minDeleteAge string) error {
+	return nil
+}
+
+func (db *DBMock) SetPolicyTemplate() error {
+	return nil
+}
+
+func TestDataServiceWebSocket_SubscribeTestsCallWithNoWebsocketClient(t *testing.T) {
+	d := DataServiceWebSocket{
+		ConnectionAllowed: func(r *http.Request) bool {
+			return true
+		},
+		genUID: func() (string, error) { return "1234", nil },
+	}
+	s := httptest.NewServer(http.HandlerFunc(d.Subscribe))
+	defer s.Close()
+	res, err := http.Get(s.URL)
+	if err != nil {
+		t.Fatalf("Error by get request %v", err.Error())
+	}
+	if res.StatusCode != 400 {
+		t.Errorf("Make http request to websocket  want statuscode %v got %v", 400, res.StatusCode)
+	}
+}
+
+func TestDataServiceWebSocket_SubscribeTests(t *testing.T) {
 	mocktime, err := time.Parse("2006-01-02", "2019-06-02")
 	if err != nil {
 		t.Fatal(err)
@@ -158,5 +186,17 @@ func Test_getIndexDate(t *testing.T) {
 				t.Errorf("getIndexDate() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestDataServiceWebSocket_Root(t *testing.T) {
+	d := DataServiceWebSocket{}
+	s := httptest.NewServer(http.HandlerFunc(d.Root))
+	res, err := http.Get(s.URL)
+	if err != nil {
+		t.Fatalf("Error by get root url: %v", err.Error())
+	}
+	if res.StatusCode != http.StatusOK {
+		t.Errorf("Want statuscode %v but got %v", 200, res.StatusCode)
 	}
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 	"os"
 	"strconv"
@@ -66,7 +67,16 @@ func main() {
 	if err := app.Run(os.Args); err != nil {
 		logger.Get().Errorw(err.Error())
 	}
+}
 
+func setIlmPolicy(db ElsticConnection, minAgeDeletePolicy string) error {
+	if err := db.SetIlmPolicy(minAgeDeletePolicy); err != nil {
+		return errors.New("error create ilm policy: " + err.Error())
+	}
+	if err := db.SetPolicyTemplate(); err != nil {
+		return errors.New("error set policy template: " + err.Error())
+	}
+	return nil
 }
 
 func run(c *cli.Context) error {
@@ -86,22 +96,24 @@ func run(c *cli.Context) error {
 		},
 	}
 	if c.BoolT(USE_DELETE_POLICY) {
-		if err := db.setIlmPolicy(c.String(MIN_AGE_DELETE_POLICY)); err != nil {
-			logger.Get().Fatalw("error create ilm policy: " + err.Error())
-		}
-		if err := db.setPolicyTemplate(); err != nil {
-			logger.Get().Fatalw("error set policy template: " + err.Error())
+		err := setIlmPolicy(&db, c.String(MIN_AGE_DELETE_POLICY))
+		if err != nil {
+			logger.Get().Fatalw(err.Error())
 		}
 	}
 
 	handler.dataserviceHandler.ConnectionAllowed = handler.ConnectionAllowed
-	router := chi.NewMux()
-	router.Get("/", handler.dataserviceHandler.Root)
-	router.HandleFunc("/data/subscribe", handler.dataserviceHandler.Subscribe)
-	logger.Get().Infow("Starting at port " + port)
+	router := registerHandler(handler.dataserviceHandler)
 	logger.Get().Fatal(http.ListenAndServe(":"+port, router))
 	return nil
 
+}
+
+func registerHandler(handler Resolver) http.Handler {
+	router := chi.NewMux()
+	router.Get("/", handler.Root)
+	router.HandleFunc("/data/subscribe", handler.Subscribe)
+	return router
 }
 
 func (h *Handler) ConnectionAllowed(r *http.Request) bool {
