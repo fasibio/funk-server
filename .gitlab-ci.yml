@@ -9,10 +9,12 @@ test:
   services:
   - name: elasticsearch:7.2.0
     alias: elasticsearch
+    command: ["bin/elasticsearch", "-Expack.security.enabled=false", "-Ediscovery.type=single-node"]
   tags: 
     - dockerfasibio
   image: golang:1.12.8
   script:
+   - echo "Sleeping for 15 seconds.."; sleep 15;
    - ELASTICSEARCH=http://elasticsearch:9200 go test -mod=vendor -short -tags=integration -coverprofile=cov.out
   artifacts: 
    paths: 
