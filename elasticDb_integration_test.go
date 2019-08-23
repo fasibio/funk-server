@@ -24,7 +24,7 @@ func TestNewElasticDb_AddLog(t *testing.T) {
 	}
 	countBefore, err := getCountOfDocumentsAtIndex(db.ctx, db.dbClient, testindex)
 	if err != nil {
-		t.Fatal("Error by get response" + err.Error())
+		countBefore = 0
 	}
 	db.AddLog(LogData{
 		Timestamp: time.Now(),
@@ -60,7 +60,7 @@ func TestNewElasticDb_AddStats(t *testing.T) {
 	}
 	countBefore, err := getCountOfDocumentsAtIndex(db.ctx, db.dbClient, testindex)
 	if err != nil {
-		t.Fatal("Error by get response" + err.Error())
+		countBefore = 0
 	}
 	db.AddStats(StatsData{
 		Timestamp: time.Now(),
