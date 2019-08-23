@@ -1,71 +1,73 @@
- 
- test:
+variables:
+  discovery.type: "single-node"
+test:
   stage: test
   only:
     - master
+  services:
+    - elasticsearch:7.2.0
   tags: 
     - dockerfasibio
   image: golang:1.12.8
   script:
-    - go test -mod=vendor -short -coverprofile=cov.out
+   - ELASTICSEARCH=http://elasticsearch:9200 go test -mod=vendor -short -tags=integration -coverprofile=cov.out
+  artifacts: 
+   paths: 
+     - ./cov.out
+
+uploadSonarqube: 
+  image: ciricihq/gitlab-sonar-scanner
+  stage: sonarqube
+  script:
+    - sonar-scanner -Dsonar.projectKey=fasibio_funk_server_$CI_COMMIT_REF_NAME -Dsonar.sources=. -Dsonar.host.url=https://sonar.server2.fasibio.de -Dsonar.login=$sonarqubelogin
+  only: 
+    - master
+  tags:
+    - dockerfasibio
   artifacts: 
     paths: 
       - ./cov.out
-
  
- uploadSonarqube: 
-   image: ciricihq/gitlab-sonar-scanner
-   stage: sonarqube
-   script:
-     - sonar-scanner -Dsonar.projectKey=fasibio_funk_server_$CI_COMMIT_REF_NAME -Dsonar.sources=. -Dsonar.host.url=https://sonar.server2.fasibio.de -Dsonar.login=$sonarqubelogin
-   only: 
-     - master
-   tags:
-     - dockerfasibio
-   artifacts: 
-     paths: 
-       - ./cov.out
- 
- buildBin: 
-    stage: buildBin
-    only:
-     - master
-    tags:
-      - dockerfasibio
-    image: golang:1.12.8-alpine3.9
-    script: 
-      - apk add make
-      - GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build -mod vendor -a -installsuffix cgo -o funk_server .
-    cache:
-      paths:
-        - funk_server
- buildImage: 
-    stage: buildImage
-    only:
-     - master
-    tags:
-      - dockerfasibio
-    image: docker
-    cache:
-      paths:
-        - funk_server
-    script: 
-      - docker build --build-arg buildNumber=${CI_PIPELINE_IID} -t fasibio/funk_server:${CI_PIPELINE_IID} .
- publish: 
-   stage: publish
-   image: docker
+buildBin: 
+   stage: buildBin
    only:
-     - master
+    - master
    tags:
      - dockerfasibio
+   image: golang:1.12.8-alpine3.9
    script: 
-     - docker login -u ${dockerhubuser} -p ${dockerhubpassword}
-     - docker push fasibio/funk_server:${CI_PIPELINE_IID}
+     - apk add make
+     - GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build -mod vendor -a -installsuffix cgo -o funk_server .
+   cache:
+     paths:
+       - funk_server
+buildImage: 
+   stage: buildImage
+   only:
+    - master
+   tags:
+     - dockerfasibio
+   image: docker
+   cache:
+     paths:
+       - funk_server
+   script: 
+     - docker build --build-arg buildNumber=${CI_PIPELINE_IID} -t fasibio/funk_server:${CI_PIPELINE_IID} .
+publish: 
+  stage: publish
+  image: docker
+  only:
+    - master
+  tags:
+    - dockerfasibio
+  script: 
+    - docker login -u ${dockerhubuser} -p ${dockerhubpassword}
+    - docker push fasibio/funk_server:${CI_PIPELINE_IID}
 
 
- stages:
-   - test
-   - sonarqube
-   - buildBin
-   - buildImage
-   - publish
+stages:
+  - test
+  - sonarqube
+  - buildBin
+  - buildImage
+  - publish

@@ -25,7 +25,10 @@ type Resolver interface {
 }
 
 func (u *DataServiceWebSocket) Root(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hallo vom Server"))
+	_, err := w.Write([]byte("Hallo vom Server"))
+	if err != nil {
+		logger.Get().Errorw("Error by Root Handler" + err.Error())
+	}
 }
 
 func getIndexDate(time time.Time) string {

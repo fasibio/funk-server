@@ -1,0 +1,23 @@
+(map[string]*elastic.IndicesGetTemplateResponse) (len=1) {
+  (string) (len=13) "funk_template": (*elastic.IndicesGetTemplateResponse)({
+    Order: (int) 0,
+    Version: (int) 0,
+    IndexPatterns: ([]string) (len=1) {
+      (string) (len=7) "*_funk*"
+    },
+    Settings: (map[string]interface {}) (len=1) {
+      (string) (len=5) "index": (map[string]interface {}) (len=3) {
+        (string) (len=9) "lifecycle": (map[string]interface {}) (len=2) {
+          (string) (len=4) "name": (string) (len=11) "funk_policy",
+          (string) (len=14) "rollover_alias": (string) (len=4) "funk"
+        },
+        (string) (len=18) "number_of_replicas": (string) (len=1) "1",
+        (string) (len=16) "number_of_shards": (string) (len=1) "1"
+      }
+    },
+    Mappings: (map[string]interface {}) {
+    },
+    Aliases: (map[string]interface {}) {
+    }
+  })
+}
