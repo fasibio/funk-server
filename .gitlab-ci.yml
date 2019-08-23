@@ -1,9 +1,14 @@
+variables:
+   RAILS_ENV: test
+
+
 test:
   stage: test
   only:
     - master
   services:
-    - elasticsearch:7.2.0
+  - name: elasticsearch:7.2.0
+    alias: elasticsearch
   tags: 
     - dockerfasibio
   image: golang:1.12.8
