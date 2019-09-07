@@ -5,7 +5,7 @@
 Funk is an simple to use Logging Collector to get your logs to the Elasticsearch Database and visible it with Kibana.
 It will be automatically collect all Data from all running Dockercontainer. 
 
-[![coverage report](https://gitlab.com/fasibio/funk-server/badges/master/coverage.svg)](https://gitlab.com/fasibio/funk-server/commits/master) [![pipeline status](https://gitlab.com/fasibio/funk-server/badges/master/pipeline.svg)](https://gitlab.com/fasibio/funk-server/commits/master)
+[![coverage report](https://gitlab.com/fasibio/funk-server/badges/master/coverage.svg)](https://sonar.server2.fasibio.de/dashboard?id=fasibio_funk_server_master) [![pipeline status](https://gitlab.com/fasibio/funk-server/badges/master/pipeline.svg)](https://gitlab.com/fasibio/funk-server/commits/master)
 
 ## Motivation
 
