@@ -64,7 +64,6 @@ buildImageTag:
    only:
     - /^([0-9]{0,3})\.([0-9]{0,3})\.([0-9]{0,3})$/
     - /^rc_([0-9]{0,3})\.([0-9]{0,3})\.([0-9]{0,3}).*/
-    - master
    tags:
      - dockerfasibio
    image: docker
@@ -81,7 +80,6 @@ publishTag:
   only:
     - /^([0-9]{0,3})\.([0-9]{0,3})\.([0-9]{0,3})$/
     - /^rc_([0-9]{0,3})\.([0-9]{0,3})\.([0-9]{0,3}).*/
-    - master
   tags:
     - dockerfasibio
   script: 
