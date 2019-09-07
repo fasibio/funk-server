@@ -6,6 +6,7 @@ variables:
 
 # Unit and integration tests
 test:
+  coverage: ^total:\t+\(statements\)\t+(\d+\.\d+)%
   stage: test
   only:
     - /^([0-9]{0,3})\.([0-9]{0,3})\.([0-9]{0,3})$/
@@ -21,6 +22,7 @@ test:
   script:
    - echo "Sleeping for 15 seconds.."; sleep 15;
    - ELASTICSEARCH=http://elasticsearch:9200 go test -mod=vendor -short -tags=integration -coverprofile=cov.out
+   - go tool cover -func cov.out  
   artifacts: 
    paths: 
      - ./cov.out
