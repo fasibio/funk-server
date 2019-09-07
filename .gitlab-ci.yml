@@ -6,7 +6,7 @@ variables:
 
 # Unit and integration tests
 test:
-  coverage: ^total:\t+\(statements\)\t+(\d+\.\d+)%
+  coverage: /^total:\t+\(statements\)\t+(\d+\.\d+)%/
   stage: test
   only:
     - /^([0-9]{0,3})\.([0-9]{0,3})\.([0-9]{0,3})$/
