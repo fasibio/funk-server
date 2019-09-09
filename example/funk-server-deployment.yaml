@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    funk.log: "false"
+    kompose.cmd: kompose convert
+    kompose.version: 1.13.0 (84fa826)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: funk-server
+  name: funk-server
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: funk-server
+    spec:
+      containers:
+      - env:
+        - name: CONNECTION_KEY
+          value: changeMe7894561323
+        - name: ELASTICSEARCH_URL
+          value: http://elasticsearch:9200
+        image: fasibio/funk_server:latest
+        name: funk-server
+        ports:
+        - containerPort: 3000
+        resources: {}
+      restartPolicy: Always
+status: {}

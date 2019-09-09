@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    funk.searchindex: funk_agent
+    kompose.cmd: kompose convert
+    kompose.version: 1.13.0 (84fa826)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: funk-agent
+  name: funk-agent
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: funk-agent
+    spec:
+      containers:
+      - env:
+        - name: CONNECTION_KEY
+          value: changeMe7894561323
+        - name: FUNK_SERVER
+          value: ws://funk-server:3000
+        image: fasibio/funk_agent:latest
+        name: funk-agent
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: funk-agent-claim0
+      restartPolicy: Always
+      volumes:
+      - name: funk-agent-claim0
+        hostPath:
+          path: /var/run/docker.sock
+status: {}

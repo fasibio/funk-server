@@ -1,0 +1,31 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    funk.log.formatRegex: (?P<client_ip>(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))
+      - - \[(?P<time>.*)\] "(?P<methode>GET|POST|PUT|DELETE).*" (?P<status_code>[0-9]{3}).*
+    funk.log.stats: "false"
+    funk.searchindex: httpd
+    kompose.cmd: kompose convert
+    kompose.version: 1.13.0 (84fa826)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: testhttpd
+  name: testhttpd
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: testhttpd
+    spec:
+      containers:
+      - image: httpd
+        name: testhttpd
+        ports:
+        - containerPort: 80
+        resources: {}
+      restartPolicy: Always
+status: {}

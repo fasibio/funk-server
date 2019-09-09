@@ -6,7 +6,7 @@ services:
       - elk
     ports: 
       - 3000:3000
-    image: fasibio/funk_server:14
+    image: fasibio/funk_server:latest
     environment: 
       ELASTICSEARCH_URL: http://elasticsearch:9200
       CONNECTION_KEY: changeMe7894561323 # Shared Key you have to set on each agent...
@@ -16,7 +16,7 @@ services:
   funk-agent: # the funk agent to collect the logs
     networks: 
       - elk
-    image: fasibio/funk_agent:24
+    image: fasibio/funk_agent:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # Its nesssari to talk with docker it self. Agent will not be running without this
     environment:
