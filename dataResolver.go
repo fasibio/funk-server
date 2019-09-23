@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
@@ -58,8 +57,6 @@ func (u *DataServiceWebSocket) interpretMessage(messages []Message, logs *zap.Su
 				logs.Errorw("error by unmarshal data:" + err.Error())
 				d = v
 			}
-
-			log.Println(staticContent, d)
 			switch msg.Type {
 			case MessageTypeLog:
 				u.Db.AddLog(LogData{
