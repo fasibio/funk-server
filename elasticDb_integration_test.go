@@ -28,7 +28,7 @@ func TestNewElasticDb_AddLog(t *testing.T) {
 	}
 	db.AddLog(LogData{
 		Timestamp: time.Now(),
-		Type:      string(MessageType_Log),
+		Type:      string(MessageTypeLog),
 		Logs: Testdata{
 			Message: "Test",
 		},
@@ -64,7 +64,7 @@ func TestNewElasticDb_AddStats(t *testing.T) {
 	}
 	db.AddStats(StatsData{
 		Timestamp: time.Now(),
-		Type:      string(MessageType_Log),
+		Type:      string(MessageTypeLog),
 		Stats: Testdata{
 			Message: "Test",
 		},
