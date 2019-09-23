@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -45,29 +46,38 @@ func (u *DataServiceWebSocket) interpretMessage(messages []Message, logs *zap.Su
 	for _, msg := range messages {
 		str := msg.Data
 		var d interface{}
-
+		var staticContent interface{}
+		err := json.Unmarshal([]byte(msg.StaticContent), &staticContent)
+		if err != nil {
+			logs.Errorw("error by unmarshal staticcontent:"+err.Error(), "staticcontent", msg.StaticContent)
+			staticContent = msg.StaticContent
+		}
 		for _, v := range str {
 			err := json.Unmarshal([]byte(v), &d)
 			if err != nil {
 				logs.Errorw("error by unmarshal data:" + err.Error())
 				d = v
 			}
+
+			log.Println(staticContent, d)
 			switch msg.Type {
-			case MessageType_Log:
+			case MessageTypeLog:
 				u.Db.AddLog(LogData{
-					Timestamp:  msg.Time,
-					Type:       string(msg.Type),
-					Logs:       d,
-					Attributes: msg.Attributes,
+					Timestamp:     msg.Time,
+					Type:          string(msg.Type),
+					Logs:          d,
+					Attributes:    msg.Attributes,
+					StaticContent: staticContent,
 				}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now()))
 
-			case MessageType_Stats:
+			case MessageTypeStats:
 				{
 					u.Db.AddStats(StatsData{
-						Timestamp:  msg.Time,
-						Type:       string(msg.Type),
-						Stats:      d,
-						Attributes: msg.Attributes,
+						Timestamp:     msg.Time,
+						Type:          string(msg.Type),
+						Stats:         d,
+						Attributes:    msg.Attributes,
+						StaticContent: staticContent,
 					}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now()))
 				}
 			}

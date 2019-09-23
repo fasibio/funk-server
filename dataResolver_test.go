@@ -81,7 +81,7 @@ func TestDataServiceWebSocket_SubscribeTests(t *testing.T) {
 			getMessageObjToSend: func() Message {
 				return Message{
 					Time: mocktime,
-					Type: MessageType_Log,
+					Type: MessageTypeLog,
 					Data: []string{
 						"{\"test\":\"test\"",
 					},
@@ -101,7 +101,7 @@ func TestDataServiceWebSocket_SubscribeTests(t *testing.T) {
 			getMessageObjToSend: func() Message {
 				return Message{
 					Time: mocktime,
-					Type: MessageType_Stats,
+					Type: MessageTypeStats,
 					Data: []string{
 						"{\"test\":\"test\"",
 					},

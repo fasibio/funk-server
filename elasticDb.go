@@ -85,17 +85,19 @@ func NewElasticDb(url, esmapping string) (KonfigData, error) {
 }
 
 type StatsData struct {
-	Timestamp  time.Time   `json:"timestamp,omitempty"`
-	Type       string      `json:"-"`
-	Stats      interface{} `json:"stats,omitempty"`
-	Attributes Attributes  `json:"attr,omitempty"`
+	Timestamp     time.Time   `json:"timestamp,omitempty"`
+	Type          string      `json:"-"`
+	Stats         interface{} `json:"stats,omitempty"`
+	Attributes    Attributes  `json:"attr,omitempty"`
+	StaticContent interface{} `json:"static_content,omitempty"`
 }
 
 type LogData struct {
-	Timestamp  time.Time   `json:"timestamp,omitempty"`
-	Type       string      `json:"-,omitempty"`
-	Logs       interface{} `json:"logs,omitempty"`
-	Attributes Attributes  `json:"attr,omitempty"`
+	Timestamp     time.Time   `json:"timestamp,omitempty"`
+	Type          string      `json:"-,omitempty"`
+	Logs          interface{} `json:"logs,omitempty"`
+	Attributes    Attributes  `json:"attr,omitempty"`
+	StaticContent interface{} `json:"static_content,omitempty"`
 }
 
 func getIlmPolicyBody(minDeleteAge string) string {

@@ -4,6 +4,9 @@ services:
   kibana:
     networks: 
       - elk
+    labels: 
+      "funk.log.staticcontent": "{\"kibanaspezialv\": 1}"
+      "funk.searchindex": "kibana"
     ports:
       - 5601:5601
     image: docker.elastic.co/kibana/kibana:7.2.0
@@ -11,6 +14,9 @@ services:
       ELASTICSEARCH_URL: http://elasticsearch:9200
   elasticsearch: 
     image: elasticsearch:7.2.0
+    labels: 
+      "funk.log.staticcontent": "{\"esspezialv\": 1}"
+      "funk.searchindex": "elasticsearch"
     ports: 
       - 127.0.0.1:9200:9200
       - 9300:9300
