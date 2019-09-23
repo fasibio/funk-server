@@ -158,6 +158,7 @@ func (k *KonfigData) SetPolicyTemplate() error {
 }
 
 func (k *KonfigData) AddStats(data StatsData, index string) {
+	logger.Get().Debugw("statsData from Client for index: " + index)
 	bulkRequest := k.dbClient.Bulk()
 	tmp := elastic.NewBulkIndexRequest().Index(index).Type(data.Type).Id(genID()).Doc(data)
 	bulkRequest.Add(tmp)
@@ -169,7 +170,7 @@ func (k *KonfigData) AddStats(data StatsData, index string) {
 }
 
 func (k *KonfigData) AddLog(data LogData, index string) {
-	logger.Get().Infow("logData from Client for index: " + index)
+	logger.Get().Debugw("logData from Client for index: " + index)
 
 	bulkRequest := k.dbClient.Bulk()
 	tmp := elastic.NewBulkIndexRequest().Index(index).Type(data.Type).Id(genID()).Doc(data)
