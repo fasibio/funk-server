@@ -122,6 +122,24 @@ func TestNewElasticDb_SetIlmPolicy(t *testing.T) {
 
 }
 
+func TestNewElasticDb_SetFunkLogsDynamicTemplate(t *testing.T) {
+	db, err := NewElasticDb(getElasticUrl(), "")
+	if err != nil {
+		t.Fatal("Error by connect to db" + err.Error())
+	}
+	err = db.SetFunkLogsDynamicTemplate()
+	if err != nil {
+		t.Errorf("Error by create dynamic Template %v", err)
+	}
+
+	res, err := db.dbClient.IndexGetTemplate("funklog_dynamic_template").Do(db.ctx)
+	if err != nil {
+		t.Errorf("Error by Search for Template funklog_dynamic_template %v", err)
+	}
+	cupaloy.SnapshotT(t, res)
+
+}
+
 func getCountOfDocumentsAtIndex(ctx context.Context, db *elastic.Client, index string) (int64, error) {
 	is := elastic.NewIndicesStatsService(db)
 	resp, err := is.Index(index).Do(ctx)

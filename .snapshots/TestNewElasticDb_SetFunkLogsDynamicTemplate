@@ -1,0 +1,25 @@
+(map[string]*elastic.IndicesGetTemplateResponse) (len=1) {
+  (string) (len=24) "funklog_dynamic_template": (*elastic.IndicesGetTemplateResponse)({
+    Order: (int) 0,
+    Version: (int) 0,
+    IndexPatterns: ([]string) (len=1) {
+      (string) (len=11) "*logs_funk*"
+    },
+    Settings: (map[string]interface {}) {
+    },
+    Mappings: (map[string]interface {}) (len=1) {
+      (string) (len=17) "dynamic_templates": ([]interface {}) (len=1) {
+        (map[string]interface {}) (len=1) {
+          (string) (len=8) "integers": (map[string]interface {}) (len=2) {
+            (string) (len=7) "mapping": (map[string]interface {}) (len=1) {
+              (string) (len=4) "type": (string) (len=9) "geo_point"
+            },
+            (string) (len=10) "path_match": (string) (len=23) "logs.funkgeoip.location"
+          }
+        }
+      }
+    },
+    Aliases: (map[string]interface {}) {
+    }
+  })
+}

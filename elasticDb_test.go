@@ -20,3 +20,7 @@ func Test_getIlmPolicyBody(t *testing.T) {
 func Test_getPolicyTemplateBody(t *testing.T) {
 	cupaloy.SnapshotT(t, getPolicyTemplateBody())
 }
+
+func Test_getFunkLogsDynamicTemplateBody(t *testing.T) {
+	cupaloy.SnapshotT(t, getFunkLogsDynamicTemplateBody())
+}

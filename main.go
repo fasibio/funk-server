@@ -101,6 +101,10 @@ func run(c *cli.Context) error {
 			logger.Get().Fatalw(err.Error())
 		}
 	}
+	err = db.SetFunkLogsDynamicTemplate()
+	if err != nil {
+		logger.Get().Fatalw(err.Error())
+	}
 
 	handler.dataserviceHandler.ConnectionAllowed = handler.ConnectionAllowed
 	router := registerHandler(handler.dataserviceHandler)
