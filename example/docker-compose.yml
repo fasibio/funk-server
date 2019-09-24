@@ -57,7 +57,7 @@ services:
       "funk.searchindex": "httpd" # The index at your elasticseach db to collect logs from this container
       "funk.log.formatRegex": "(?P<client_ip>(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])) - - \\[(?P<time>.*)\\] \"(?P<methode>GET|POST|PUT|DELETE).*\" (?P<status_code>[0-9]{3}).*" # No JSON so this regex will separate the messages into different values see the submatiching
       "funk.log.stats": "false" # No statslogging
-      "funk.log.geodatafromip": ".client_ip" # funk agent will use the ip and will try to find out geo information  
+      "funk.log.geodatafromip": ".client_ip" # funk agent will use the ip and will try to find out geo information <- this will not find this in this example because its a private ip
 networks:
   elk:
     external: true
