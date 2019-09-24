@@ -29,6 +29,8 @@ So with this solution you can define How and whats logging directly at you docke
 
 ### Prerequisites
 
+
+
 Take a look at the [docker-compose.yml](./example/docker-compose.yml) and try it!
 It will start 5 Container.(funk-server, funk-agent, Kibana, elasticsearch, a test http container) 
 
@@ -79,11 +81,13 @@ So it need minimum space.
 
 ## Possible Configuration
 
- - HTTP_PORT (default: 3000) ==> port to start the server on
- - ELASTICSEARCH_URL ==> URL to Elasticsearch DB
- - CONNECTION_KEY ==> The connectionkey given to the funk_agent so he can connect
- - USE_DELETE_POLICY (default: true) ==>  it will set an [ilm](https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index-lifecycle-management.html) on funk indexes
- - MIN_AGE_DELETE_POLICY (default: 90d) ==> Set the Date to delete data from the funk indexes
+Environment   | value | description
+--- | --- | ---
+HTTP_PORT | int  (default: 3000) |  port to start the server on
+ELASTICSEARCH_URL  | http://domain:port (default : http://localhost:9200) |  URL to Elasticsearch DB
+CONNECTION_KEY | any string |  The connectionkey given to the funk_agent so he can connect
+USE_DELETE_POLICY | boolean (default: true) |   it will set an [ilm](https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index-lifecycle-management.html) on funk indexes
+|  MIN_AGE_DELETE_POLICY | [number][hd](default: 90d) | Set the Date to delete data from the funk indexes
 
 
 To see possible Configurations and available Labels for the container at [funk-agent](https://github.com/fasibio/funk_agent) see there. 
@@ -98,6 +102,8 @@ Its a Websocketconnection...
 Path: /data/subscribe
 
 Header ```funk.connection``` should be the CONNECTION_KEY
+
+At the moment there are one reserved nested Object at data it calls ```funkgeoip```
 
 ## Dataformat: 
 Look add the [Message struct](./types.go)

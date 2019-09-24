@@ -98,12 +98,12 @@ func run(c *cli.Context) error {
 	if c.BoolT(USE_DELETE_POLICY) {
 		err := setIlmPolicy(&db, c.String(MIN_AGE_DELETE_POLICY))
 		if err != nil {
-			logger.Get().Fatalw(err.Error())
+			logger.Get().Fatalw("setIlmPolicy " + err.Error())
 		}
 	}
 	err = db.SetFunkLogsDynamicTemplate()
 	if err != nil {
-		logger.Get().Fatalw(err.Error())
+		logger.Get().Fatalw("FunkLogsDynamicTemplate " + err.Error())
 	}
 
 	handler.dataserviceHandler.ConnectionAllowed = handler.ConnectionAllowed
