@@ -35,6 +35,7 @@ services:
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
     labels: 
+      "funk.log.staticcontent": "{\"usage\": \"loganalyze\"}" # Static information to log application cases for example staging
       "funk.searchindex": "kibana" # The index at your elasticseach db to collect logs from this container
       
   elasticsearch:  #Your Elasticsearchdb
