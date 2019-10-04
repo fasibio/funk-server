@@ -43,10 +43,10 @@ func NewElasticDb(url, esmapping string) (KonfigData, error) {
 		}
 	}
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 20; i++ {
 		info, code, err := client.Ping(url).Do(ctx)
 		if err != nil {
-			time.Sleep(2 * time.Second)
+			time.Sleep(5 * time.Second)
 			logger.Get().Infow("Error by Ping Try again to Find Elasticsearchdb")
 			if i == 9 {
 				return KonfigData{}, err
