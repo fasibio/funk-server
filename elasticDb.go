@@ -32,7 +32,7 @@ func NewElasticDb(url, esmapping string) (KonfigData, error) {
 	for i := 0; i < 20; i++ {
 		c, err := elastic.NewSimpleClient(elastic.SetURL(url))
 		if err != nil {
-			time.Sleep(1 * time.Second)
+			time.Sleep(5 * time.Second)
 			if i == 19 {
 				return KonfigData{}, err
 			}

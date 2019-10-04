@@ -46,6 +46,9 @@ services:
     networks: 
       - elk
     environment: 
+      # - xpack.security.enabled=true
+      # - xpack.ml.enabled=true
+      # - xpack.watcher.enabled=true     
       - discovery.type=single-node
     labels: 
       "funk.log": "false" #do not log this container
