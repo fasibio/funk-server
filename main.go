@@ -20,11 +20,13 @@ type Handler struct {
 }
 
 const (
-	HTTP_PORT             = "port"
-	ELASTICSEARCH_URL     = "elasticSearchUrl"
-	CONNECTION_KEY        = "connectionkey"
-	USE_DELETE_POLICY     = "usedeletePolicy"
-	MIN_AGE_DELETE_POLICY = "minagedeletepolicy"
+	HTTP_PORT              = "port"
+	ELASTICSEARCH_URL      = "elasticSearchUrl"
+	CONNECTION_KEY         = "connectionkey"
+	USE_DELETE_POLICY      = "usedeletePolicy"
+	MIN_AGE_DELETE_POLICY  = "minagedeletepolicy"
+	ELASTICSEARCH_USERNAME = "elasticsearchUsername"
+	ELASTICSEARCH_PASSWORD = "elasticsearchPassword"
 )
 
 func main() {
@@ -62,6 +64,18 @@ func main() {
 			Value:  "90d",
 			Usage:  "Set the Date to delete data from the funk indexes",
 		},
+		cli.StringFlag{
+			Name:   ELASTICSEARCH_USERNAME,
+			EnvVar: "ELASTICSEARCH_USERNAME",
+			Value:  "",
+			Usage:  "Username for elasticsearch connection",
+		},
+		cli.StringFlag{
+			Name:   ELASTICSEARCH_PASSWORD,
+			EnvVar: "ELASTICSEARCH_PASSWORD",
+			Value:  "",
+			Usage:  "Password for elasticsearch connection",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -82,7 +96,7 @@ func setIlmPolicy(db ElsticConnection, minAgeDeletePolicy string) error {
 func run(c *cli.Context) error {
 	logger.Initialize("info")
 	logger.Get().Infow("elasticSearchUrl:" + c.String(ELASTICSEARCH_URL))
-	db, err := NewElasticDb(c.String(ELASTICSEARCH_URL), "")
+	db, err := NewElasticDb(c.String(ELASTICSEARCH_URL), c.String(ELASTICSEARCH_USERNAME), c.String(ELASTICSEARCH_PASSWORD), "")
 	port := c.String(HTTP_PORT)
 	if err != nil {
 		logger.Get().Fatal(err)

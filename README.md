@@ -85,6 +85,8 @@ Environment   | value | description
 --- | --- | ---
 HTTP_PORT | int  (default: 3000) |  port to start the server on
 ELASTICSEARCH_URL  | http://domain:port (default : http://localhost:9200) |  URL to Elasticsearch DB
+ELASTICSEARCH_USERNAME | string (default empty) | Username for elasticsearch db connection
+ELASTICSEARCH_PASSWORD | string (default empty) | Password for elasticsearch db connection
 CONNECTION_KEY | any string |  The connectionkey given to the funk_agent so he can connect
 USE_DELETE_POLICY | boolean (default: true) |   it will set an [ilm](https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index-lifecycle-management.html) on funk indexes
 |  MIN_AGE_DELETE_POLICY | [number][hd](default: 90d) | Set the Date to delete data from the funk indexes

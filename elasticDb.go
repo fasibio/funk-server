@@ -26,11 +26,11 @@ func genID() string {
 	id := ksuid.New()
 	return id.String()
 }
-func NewElasticDb(url, esmapping string) (KonfigData, error) {
+func NewElasticDb(url, username, password, esmapping string) (KonfigData, error) {
 	ctx := context.Background()
 	var client *elastic.Client
 	for i := 0; i < 20; i++ {
-		c, err := elastic.NewSimpleClient(elastic.SetURL(url))
+		c, err := elastic.NewSimpleClient(elastic.SetURL(url), elastic.SetBasicAuth(username, password))
 		if err != nil {
 			time.Sleep(5 * time.Second)
 			if i == 19 {

@@ -12,6 +12,8 @@ services:
     image: docker.elastic.co/kibana/kibana:7.2.0
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: MagicWord
   elasticsearch: 
     image: elasticsearch:7.2.0
     labels: 
@@ -23,7 +25,12 @@ services:
     networks: 
       - elk
     environment: 
-      - discovery.type=single-node
+      xpack.security.enabled: "true"
+      xpack.ml.enabled: "true"
+      xpack.watcher.enabled: "true"
+      ELASTIC_USERNAME: elastic
+      ELASTIC_PASSWORD: MagicWord
+      discovery.type: single-node
 networks:
   elk:
     external: true
