@@ -15,7 +15,7 @@ import (
 
 func TestNewElasticDb_AddLog(t *testing.T) {
 	testindex := "integrationtestunit"
-	db, err := NewElasticDb(getElasticUrl(), "")
+	db, err := NewElasticDb(getElasticUrl(), "", "", "")
 	if err != nil {
 		t.Fatal("Error by connect to db" + err.Error())
 	}
