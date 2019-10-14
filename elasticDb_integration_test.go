@@ -51,7 +51,7 @@ func TestNewElasticDb_AddLog(t *testing.T) {
 func TestNewElasticDb_AddStats(t *testing.T) {
 	testindex := "integrationtestunit_stats"
 
-	db, err := NewElasticDb(getElasticUrl(), "")
+	db, err := NewElasticDb(getElasticUrl(), "", "", "")
 	if err != nil {
 		t.Fatal("Error by connect to db" + err.Error())
 	}
@@ -85,7 +85,7 @@ func TestNewElasticDb_AddStats(t *testing.T) {
 }
 
 func TestNewElasticDb_SetPolicyTemplate(t *testing.T) {
-	db, err := NewElasticDb(getElasticUrl(), "")
+	db, err := NewElasticDb(getElasticUrl(), "", "", "")
 	if err != nil {
 		t.Fatal("Error by connect to db" + err.Error())
 	}
@@ -103,7 +103,7 @@ func TestNewElasticDb_SetPolicyTemplate(t *testing.T) {
 }
 
 func TestNewElasticDb_SetIlmPolicy(t *testing.T) {
-	db, err := NewElasticDb(getElasticUrl(), "")
+	db, err := NewElasticDb(getElasticUrl(), "", "", "")
 	if err != nil {
 		t.Fatal("Error by connect to db" + err.Error())
 	}
@@ -123,7 +123,7 @@ func TestNewElasticDb_SetIlmPolicy(t *testing.T) {
 }
 
 func TestNewElasticDb_SetFunkLogsDynamicTemplate(t *testing.T) {
-	db, err := NewElasticDb(getElasticUrl(), "")
+	db, err := NewElasticDb(getElasticUrl(), "", "", "")
 	if err != nil {
 		t.Fatal("Error by connect to db" + err.Error())
 	}
