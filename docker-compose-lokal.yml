@@ -1,6 +1,16 @@
 version: "3"
 
 services: 
+  grafana: 
+    networks: 
+      - elk
+    labels: 
+      "funk.searchindex": "kibana"
+    image: grafana/grafana
+    ports: 
+     - 3123:3000
+    environment: 
+      GF_SECURITY_ADMIN_PASSWORD: secret
   kibana:
     networks: 
       - elk
