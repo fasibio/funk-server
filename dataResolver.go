@@ -99,7 +99,7 @@ func (u *DataServiceWebSocket) messageSubscribeHandler(uuid string, c *websocket
 
 func (u *DataServiceWebSocket) Subscribe(w http.ResponseWriter, r *http.Request) {
 	if !u.ConnectionAllowed(r) {
-		logger.Get().Infow("Connection forbidden to subscribe")
+		logger.Get().Infow("Connection forbidden to subscribe", "ForwardedIP", r.Header.Get("X-Forwarded-For"))
 		w.WriteHeader(401)
 		return
 	}

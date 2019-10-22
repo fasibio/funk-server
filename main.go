@@ -25,6 +25,7 @@ const (
 	CONNECTION_KEY        = "connectionkey"
 	USE_DELETE_POLICY     = "usedeletePolicy"
 	MIN_AGE_DELETE_POLICY = "minagedeletepolicy"
+	LOG_LEVEL             = "loglevel"
 )
 
 func main() {
@@ -62,6 +63,12 @@ func main() {
 			Value:  "90d",
 			Usage:  "Set the Date to delete data from the funk indexes",
 		},
+		cli.StringFlag{
+			Name:   LOG_LEVEL,
+			EnvVar: "LOG_LEVEL",
+			Value:  "info",
+			Usage:  "Set loglevel for funk-server [debug|info|warn|error]",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -80,7 +87,7 @@ func setIlmPolicy(db ElsticConnection, minAgeDeletePolicy string) error {
 }
 
 func run(c *cli.Context) error {
-	logger.Initialize("info")
+	logger.Initialize(c.String(LOG_LEVEL))
 	logger.Get().Infow("elasticSearchUrl:" + c.String(ELASTICSEARCH_URL))
 	db, err := NewElasticDb(c.String(ELASTICSEARCH_URL), "")
 	port := c.String(HTTP_PORT)
