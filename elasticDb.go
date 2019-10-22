@@ -26,13 +26,13 @@ func genID() string {
 	id := ksuid.New()
 	return id.String()
 }
-func NewElasticDb(url, esmapping string) (KonfigData, error) {
+func NewElasticDb(url, username, password, esmapping string) (KonfigData, error) {
 	ctx := context.Background()
 	var client *elastic.Client
 	for i := 0; i < 20; i++ {
-		c, err := elastic.NewSimpleClient(elastic.SetURL(url))
+		c, err := elastic.NewSimpleClient(elastic.SetURL(url), elastic.SetBasicAuth(username, password))
 		if err != nil {
-			time.Sleep(1 * time.Second)
+			time.Sleep(5 * time.Second)
 			if i == 19 {
 				return KonfigData{}, err
 			}
@@ -43,10 +43,10 @@ func NewElasticDb(url, esmapping string) (KonfigData, error) {
 		}
 	}
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 20; i++ {
 		info, code, err := client.Ping(url).Do(ctx)
 		if err != nil {
-			time.Sleep(2 * time.Second)
+			time.Sleep(5 * time.Second)
 			logger.Get().Infow("Error by Ping Try again to Find Elasticsearchdb")
 			if i == 9 {
 				return KonfigData{}, err
@@ -86,7 +86,7 @@ func NewElasticDb(url, esmapping string) (KonfigData, error) {
 
 type StatsData struct {
 	Timestamp     time.Time   `json:"timestamp,omitempty"`
-	Type          string      `json:"-"`
+	Type          string      `json:"message_type"`
 	Stats         interface{} `json:"stats,omitempty"`
 	Attributes    Attributes  `json:"attr,omitempty"`
 	StaticContent interface{} `json:"static_content,omitempty"`
@@ -94,7 +94,7 @@ type StatsData struct {
 
 type LogData struct {
 	Timestamp     time.Time   `json:"timestamp,omitempty"`
-	Type          string      `json:"-,omitempty"`
+	Type          string      `json:"message_type,omitempty"`
 	Logs          interface{} `json:"logs,omitempty"`
 	Attributes    Attributes  `json:"attr,omitempty"`
 	StaticContent interface{} `json:"static_content,omitempty"`
@@ -132,6 +132,29 @@ func (k *KonfigData) SetIlmPolicy(minDeleteAge string) error {
 	return nil
 }
 
+func getFunkLogsDynamicTemplateBody() string {
+	return `
+	{
+		"index_patterns": ["*logs_funk*"],
+		"mappings": {
+			"dynamic_templates": [
+				{
+					"integers": {
+						"path_match": "logs.funkgeoip.location",
+						"mapping": {
+							"type": "geo_point"
+						}
+					}
+				}
+			]
+		}
+	}`
+}
+
+func (k *KonfigData) SetFunkLogsDynamicTemplate() error {
+	_, err := k.dbClient.IndexPutTemplate("funklog_dynamic_template").BodyString(getFunkLogsDynamicTemplateBody()).Do(k.ctx)
+	return err
+}
 func getPolicyTemplateBody() string {
 	return `
 	{
@@ -162,7 +185,7 @@ func (k *KonfigData) SetPolicyTemplate() error {
 func (k *KonfigData) AddStats(data StatsData, index string) {
 	logger.Get().Debugw("statsData from Client for index: " + index)
 	bulkRequest := k.dbClient.Bulk()
-	tmp := elastic.NewBulkIndexRequest().Index(index).Type(data.Type).Id(genID()).Doc(data)
+	tmp := elastic.NewBulkIndexRequest().Index(index).Type("_doc").Id(genID()).Doc(data)
 	bulkRequest.Add(tmp)
 	_, err := bulkRequest.Do(k.ctx)
 	if err != nil {
@@ -175,7 +198,8 @@ func (k *KonfigData) AddLog(data LogData, index string) {
 	logger.Get().Debugw("logData from Client for index: " + index)
 
 	bulkRequest := k.dbClient.Bulk()
-	tmp := elastic.NewBulkIndexRequest().Index(index).Type(data.Type).Id(genID()).Doc(data)
+	tmp := elastic.NewBulkIndexRequest().Index(index).Type("_doc").Id(genID()).Doc(data)
+
 	bulkRequest.Add(tmp)
 	_, err := bulkRequest.Do(k.ctx)
 	if err != nil {

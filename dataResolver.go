@@ -67,7 +67,7 @@ func (u *DataServiceWebSocket) interpretMessage(messages []Message, logs *zap.Su
 					StaticContent: staticContent,
 				}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now()))
 
-			case MessageTypeStats:
+			default:
 				{
 					u.Db.AddStats(StatsData{
 						Timestamp:     msg.Time,

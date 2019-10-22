@@ -15,7 +15,7 @@ import (
 
 func TestNewElasticDb_AddLog(t *testing.T) {
 	testindex := "integrationtestunit"
-	db, err := NewElasticDb(getElasticUrl(), "")
+	db, err := NewElasticDb(getElasticUrl(), "", "", "")
 	if err != nil {
 		t.Fatal("Error by connect to db" + err.Error())
 	}
@@ -51,7 +51,7 @@ func TestNewElasticDb_AddLog(t *testing.T) {
 func TestNewElasticDb_AddStats(t *testing.T) {
 	testindex := "integrationtestunit_stats"
 
-	db, err := NewElasticDb(getElasticUrl(), "")
+	db, err := NewElasticDb(getElasticUrl(), "", "", "")
 	if err != nil {
 		t.Fatal("Error by connect to db" + err.Error())
 	}
@@ -85,7 +85,7 @@ func TestNewElasticDb_AddStats(t *testing.T) {
 }
 
 func TestNewElasticDb_SetPolicyTemplate(t *testing.T) {
-	db, err := NewElasticDb(getElasticUrl(), "")
+	db, err := NewElasticDb(getElasticUrl(), "", "", "")
 	if err != nil {
 		t.Fatal("Error by connect to db" + err.Error())
 	}
@@ -103,7 +103,7 @@ func TestNewElasticDb_SetPolicyTemplate(t *testing.T) {
 }
 
 func TestNewElasticDb_SetIlmPolicy(t *testing.T) {
-	db, err := NewElasticDb(getElasticUrl(), "")
+	db, err := NewElasticDb(getElasticUrl(), "", "", "")
 	if err != nil {
 		t.Fatal("Error by connect to db" + err.Error())
 	}
@@ -119,6 +119,24 @@ func TestNewElasticDb_SetIlmPolicy(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error by json.Marshal" + err.Error())
 	}
+
+}
+
+func TestNewElasticDb_SetFunkLogsDynamicTemplate(t *testing.T) {
+	db, err := NewElasticDb(getElasticUrl(), "", "", "")
+	if err != nil {
+		t.Fatal("Error by connect to db" + err.Error())
+	}
+	err = db.SetFunkLogsDynamicTemplate()
+	if err != nil {
+		t.Errorf("Error by create dynamic Template %v", err)
+	}
+
+	res, err := db.dbClient.IndexGetTemplate("funklog_dynamic_template").Do(db.ctx)
+	if err != nil {
+		t.Errorf("Error by Search for Template funklog_dynamic_template %v", err)
+	}
+	cupaloy.SnapshotT(t, res)
 
 }
 

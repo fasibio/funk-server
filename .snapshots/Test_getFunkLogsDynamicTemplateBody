@@ -1,0 +1,16 @@
+
+	{
+		"index_patterns": ["*logs_funk*"],
+		"mappings": {
+			"dynamic_templates": [
+				{
+					"integers": {
+						"path_match": "logs.funkgeoip.location",
+						"mapping": {
+							"type": "geo_point"
+						}
+					}
+				}
+			]
+		}
+	}
