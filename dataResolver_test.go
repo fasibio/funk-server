@@ -32,7 +32,7 @@ func (db *DBMock) AddStats(data StatsData, index string) {
 	db.tisExecute = true
 }
 
-func (db *DBMock) SetIlmPolicy(minDeleteAge string) error {
+func (db *DBMock) SetIlmPolicy(p DataRolloverPattern) error {
 	return nil
 }
 
@@ -167,22 +167,51 @@ func TestDataServiceWebSocket_SubscribeTests(t *testing.T) {
 
 func Test_getIndexDate(t *testing.T) {
 	tests := []struct {
-		name string
-		time func() time.Time
-		want string
+		name      string
+		time      func() time.Time
+		indextype DataRolloverPattern
+		want      string
 	}{
 		{
-			name: "Returns 2016-01-02",
+			name: "is weekly so Returns 2016-5",
 			time: func() time.Time {
-				res, _ := time.Parse("2006-01-02", "2016-01-02")
+				res, _ := time.Parse("2006-01-02", "2016-02-02")
 				return res
 			},
-			want: "2016-01-02",
+			indextype: Weekly,
+			want:      "2016-5",
+		},
+		{
+			name: "is weekly so Returns 2019-44",
+			time: func() time.Time {
+				res, _ := time.Parse("2006-01-02", "2019-10-31")
+				return res
+			},
+			indextype: Weekly,
+			want:      "2019-44",
+		},
+		{
+			name: "is daily so Returns 2019-10-31",
+			time: func() time.Time {
+				res, _ := time.Parse("2006-01-02", "2019-10-31")
+				return res
+			},
+			indextype: Daily,
+			want:      "2019-10-31",
+		},
+		{
+			name: "is monthly so Returns 2019-10",
+			time: func() time.Time {
+				res, _ := time.Parse("2006-01-02", "2019-10-31")
+				return res
+			},
+			indextype: Monthly,
+			want:      "2019-10",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getIndexDate(tt.time()); got != tt.want {
+			if got := getIndexDate(tt.time(), tt.indextype); got != tt.want {
 				t.Errorf("getIndexDate() = %v, want %v", got, tt.want)
 			}
 		})

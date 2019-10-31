@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -17,6 +18,7 @@ type DataServiceWebSocket struct {
 	genUID            func() (string, error)
 	Db                ElsticConnection
 	ConnectionAllowed func(*http.Request) bool
+	rollOverPattern   DataRolloverPattern
 }
 
 type Resolver interface {
@@ -31,8 +33,68 @@ func (u *DataServiceWebSocket) Root(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getIndexDate(time time.Time) string {
-	return time.Format("2006-01-02")
+type DataRolloverPattern string
+
+func (d DataRolloverPattern) GetDeletePhaseString() string {
+	switch d {
+	case Daily:
+		return "30d"
+	case Weekly:
+		return "90d"
+	case Monthly:
+		return "180d"
+	default:
+		//if does not match is weekly
+		return "8d"
+	}
+}
+
+func (d DataRolloverPattern) GetWarmPhaseString() string {
+	switch d {
+	case Daily:
+		return "2d"
+	case Weekly:
+		return "8d"
+	case Monthly:
+		return "33d"
+	default:
+		//if does not match is weekly
+		return "8d"
+	}
+}
+
+func (d DataRolloverPattern) GetColdPhaseString() string {
+	switch d {
+	case Daily:
+		return "15d"
+	case Weekly:
+		return "30d"
+	case Monthly:
+		return "60d"
+	default:
+		//if does not match is weekly
+		return "30d"
+	}
+}
+
+const Daily DataRolloverPattern = "Daily"
+const Weekly DataRolloverPattern = "Weekly"
+const Monthly DataRolloverPattern = "Monthly"
+
+func getIndexDate(time time.Time, indextype DataRolloverPattern) string {
+	switch indextype {
+	case Daily:
+		return time.Format("2006-01-02")
+	case Weekly:
+		year, week := time.ISOWeek()
+		return fmt.Sprintf("%d-%d", year, week)
+	case Monthly:
+		return time.Format("2006-01")
+	default:
+		//if does not match is weekly
+		year, week := time.ISOWeek()
+		return fmt.Sprintf("%d-%d", year, week)
+	}
 }
 
 func getLoggerWithSubscriptionID(logs *zap.SugaredLogger, uuid string) *zap.SugaredLogger {
@@ -65,7 +127,7 @@ func (u *DataServiceWebSocket) interpretMessage(messages []Message, logs *zap.Su
 					Logs:          d,
 					Attributes:    msg.Attributes,
 					StaticContent: staticContent,
-				}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now()))
+				}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now(), u.rollOverPattern))
 
 			default:
 				{
@@ -75,7 +137,7 @@ func (u *DataServiceWebSocket) interpretMessage(messages []Message, logs *zap.Su
 						Stats:         d,
 						Attributes:    msg.Attributes,
 						StaticContent: staticContent,
-					}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now()))
+					}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now(), u.rollOverPattern))
 				}
 			}
 		}

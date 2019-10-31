@@ -88,12 +88,35 @@ ELASTICSEARCH_URL  | http://domain:port (default : http://localhost:9200) |  URL
 ELASTICSEARCH_USERNAME | string (default empty) | Username for elasticsearch db connection
 ELASTICSEARCH_PASSWORD | string (default empty) | Password for elasticsearch db connection
 CONNECTION_KEY | any string |  The connectionkey given to the funk_agent so he can connect
-USE_DELETE_POLICY | boolean (default: true) |   it will set an [ilm](https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index-lifecycle-management.html) on funk indexes
-|  MIN_AGE_DELETE_POLICY | [number][hd](default: 90d) | Set the Date to delete data from the funk indexes
-
+USE_DELETE_POLICY (DEPRECATED)| boolean (default: true) (DEPRECATED)|   it will set an [ilm](https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-index-lifecycle-management.html) on funk indexes (DEPRECATED)
+MIN_AGE_DELETE_POLICY (DEPRECATED)| [number][hd](default: 90d) (DEPRECATED)| Set the Date to delete data from the funk indexes (DEPRECATED)
+USE_ILM_POLICY | boolean (default: true) | To Set the automatic ILM Police. See [ILMPolice](#autoilmpolice)
+DATA_ROLLOVER_PATTERN | Daily, Weekly, Monthly (default: Weekly) | Set the elasticsearch index rollover plan [ILMPolice](#autoilmpolice)
 
 To see possible Configurations and available Labels for the container at [funk-agent](https://github.com/fasibio/funk_agent) see there. 
 
+
+# <a name="autoilmpolice"></a> Use auto IML Police
+
+If you enable ```USE_ILM_POLICY``` there is a lightweight Index Lifecycle Police. 
+This mean it will automatically move your index by time to warm, cold delete pharse. 
+
+You can navigate this by setting you ```DATA_ROLLOVER_PATTERN```. 
+If you set: 
+  -  Daily: 
+    - Move to Warm older than 2 days
+    - Move to Cold older than 15 days
+    - Will Delete all older than 30 day
+  - Weekly (this set by default)
+    - Move to Warm older than 8 days
+    - Move to Cold older than 30 days
+    - Will Delete all older than 90 day
+  - Monthly
+    - Move to Warm older than 33 days
+    - Move to Cold older than 60 days
+    - Will Delete all older than 90 day
+
+At the Future you will be have the opinion to set this information by your own JSON. At the moment set ```USE_ILM_POLICY``` to false and write it by hand. 
 
 # Protokoll
 

@@ -2,8 +2,22 @@
 	{
 		"policy": {                       
 			"phases": {
+				"warm": {
+					"min_age": "8d",
+					"actions": {
+						"shrink" : {
+							"number_of_shards": 1
+						}
+					}
+				},
+				"cold": {
+					"min_age": "30d",
+					"actions": {
+						"freeze" : { }
+					}
+				},
 				"delete": {
-					"min_age": "20d",           
+					"min_age": "8d",           
 					"actions": {
 						"delete": {}              
 					}

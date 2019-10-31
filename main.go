@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -23,10 +24,10 @@ const (
 	HTTP_PORT              = "port"
 	ELASTICSEARCH_URL      = "elasticSearchUrl"
 	CONNECTION_KEY         = "connectionkey"
-	USE_DELETE_POLICY      = "usedeletePolicy"
-	MIN_AGE_DELETE_POLICY  = "minagedeletepolicy"
+	USE_ILM_POLICY         = "useIlmPolicy"
 	ELASTICSEARCH_USERNAME = "elasticsearchUsername"
 	ELASTICSEARCH_PASSWORD = "elasticsearchPassword"
+	DATA_ROLLOVER_PATTERN  = "datarolloverpattern"
 )
 
 func main() {
@@ -54,15 +55,9 @@ func main() {
 			Usage:  "The connectionkey given to the funk_agent so he can connect",
 		},
 		cli.BoolTFlag{
-			Name:   USE_DELETE_POLICY,
-			EnvVar: "USE_DELETE_POLICY",
+			Name:   USE_ILM_POLICY,
+			EnvVar: "USE_ILM_POLICY",
 			Usage:  "Default is enabled it will set an ilm on funk indexes",
-		},
-		cli.StringFlag{
-			Name:   MIN_AGE_DELETE_POLICY,
-			EnvVar: "MIN_AGE_DELETE_POLICY",
-			Value:  "90d",
-			Usage:  "Set the Date to delete data from the funk indexes",
 		},
 		cli.StringFlag{
 			Name:   ELASTICSEARCH_USERNAME,
@@ -76,6 +71,12 @@ func main() {
 			Value:  "",
 			Usage:  "Password for elasticsearch connection",
 		},
+		cli.StringFlag{
+			Name:   DATA_ROLLOVER_PATTERN,
+			EnvVar: "DATA_ROLLOVER_PATTERN",
+			Value:  string(Weekly),
+			Usage:  fmt.Sprintf("Timeintervall to rollover data possible values: %s, %s, %s", Daily, Monthly, Weekly),
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -83,8 +84,8 @@ func main() {
 	}
 }
 
-func setIlmPolicy(db ElsticConnection, minAgeDeletePolicy string) error {
-	if err := db.SetIlmPolicy(minAgeDeletePolicy); err != nil {
+func setIlmPolicy(db ElsticConnection, indextype DataRolloverPattern) error {
+	if err := db.SetIlmPolicy(indextype); err != nil {
 		return errors.New("error create ilm policy: " + err.Error())
 	}
 	if err := db.SetPolicyTemplate(); err != nil {
@@ -101,16 +102,19 @@ func run(c *cli.Context) error {
 	if err != nil {
 		logger.Get().Fatal(err)
 	}
+	dataRollover := DataRolloverPattern(c.String(DATA_ROLLOVER_PATTERN))
+
 	handler := Handler{
 		connectionkey: c.String(CONNECTION_KEY),
 		dataserviceHandler: &DataServiceWebSocket{
 			Db:                &db,
 			ClientConnections: make(map[string]*websocket.Conn),
 			genUID:            genUID,
+			rollOverPattern:   dataRollover,
 		},
 	}
-	if c.BoolT(USE_DELETE_POLICY) {
-		err := setIlmPolicy(&db, c.String(MIN_AGE_DELETE_POLICY))
+	if c.BoolT(USE_ILM_POLICY) {
+		err := setIlmPolicy(&db, dataRollover)
 		if err != nil {
 			logger.Get().Fatalw("setIlmPolicy " + err.Error())
 		}

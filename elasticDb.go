@@ -18,7 +18,7 @@ type KonfigData struct {
 type ElsticConnection interface {
 	AddStats(data StatsData, index string)
 	AddLog(data LogData, index string)
-	SetIlmPolicy(minDeleteAge string) error
+	SetIlmPolicy(indextype DataRolloverPattern) error
 	SetPolicyTemplate() error
 }
 
@@ -100,13 +100,27 @@ type LogData struct {
 	StaticContent interface{} `json:"static_content,omitempty"`
 }
 
-func getIlmPolicyBody(minDeleteAge string) string {
+func getIlmPolicyBody(indextype DataRolloverPattern) string {
 	return `
 	{
 		"policy": {                       
 			"phases": {
+				"warm": {
+					"min_age": "` + indextype.GetWarmPhaseString() + `",
+					"actions": {
+						"shrink" : {
+							"number_of_shards": 1
+						}
+					}
+				},
+				"cold": {
+					"min_age": "` + indextype.GetColdPhaseString() + `",
+					"actions": {
+						"freeze" : { }
+					}
+				},
 				"delete": {
-					"min_age": "` + minDeleteAge + `",           
+					"min_age": "` + indextype.GetDeletePhaseString() + `",           
 					"actions": {
 						"delete": {}              
 					}
@@ -118,11 +132,11 @@ func getIlmPolicyBody(minDeleteAge string) string {
 	`
 }
 
-func (k *KonfigData) SetIlmPolicy(minDeleteAge string) error {
+func (k *KonfigData) SetIlmPolicy(indextype DataRolloverPattern) error {
 
 	ilmservice := elastic.NewXPackIlmPutLifecycleService(k.dbClient)
 	ilmservice.Policy("funk_policy")
-	ilmservice.BodyString(getIlmPolicyBody(minDeleteAge))
+	ilmservice.BodyString(getIlmPolicyBody(indextype))
 	res, err := ilmservice.Do(k.ctx)
 	if err != nil {
 		return err

@@ -61,7 +61,7 @@ func Test_genUID(t *testing.T) {
 type IlmPolicyDBMock struct {
 	t                             *testing.T
 	setIlmPolicyReturnsError      bool
-	ilmPolicyReturnsDeleteAge     string
+	ilmPlan                       DataRolloverPattern
 	setPolicyTemplateReturnsError bool
 	isExecute                     []bool
 }
@@ -72,13 +72,13 @@ func (db *IlmPolicyDBMock) AddLog(data LogData, index string) {
 func (db *IlmPolicyDBMock) AddStats(data StatsData, index string) {
 }
 
-func (db *IlmPolicyDBMock) SetIlmPolicy(minDeleteAge string) error {
+func (db *IlmPolicyDBMock) SetIlmPolicy(indextype DataRolloverPattern) error {
 	db.isExecute[0] = true
 	if db.setIlmPolicyReturnsError {
 		return errors.New("Mock Error but error")
 	}
-	if db.ilmPolicyReturnsDeleteAge != minDeleteAge {
-		db.t.Errorf("SetIlmPolicy Want deleteage %v but got %v", db.ilmPolicyReturnsDeleteAge, minDeleteAge)
+	if db.ilmPlan != indextype {
+		db.t.Errorf("SetIlmPolicy Want deleteage %v but got %v", db.ilmPlan, indextype)
 	}
 	return nil
 }
@@ -94,25 +94,25 @@ func Test_setIlmPolicy(t *testing.T) {
 		name                          string
 		setIlmPolicyReturnsError      bool
 		setPolicyTemplateReturnsError bool
-		minAgeDeletePolicy            string
+		rolloverplan                  DataRolloverPattern
 	}{
 		{
 			name:                          "Call and no error will be fallen minAge = 20d",
 			setIlmPolicyReturnsError:      false,
 			setPolicyTemplateReturnsError: false,
-			minAgeDeletePolicy:            "20d",
+			rolloverplan:                  DataRolloverPattern("monthly"),
 		},
 		{
 			name:                          "Call and error will be fallen minAge = 20d",
 			setIlmPolicyReturnsError:      true,
 			setPolicyTemplateReturnsError: true,
-			minAgeDeletePolicy:            "20d",
+			rolloverplan:                  DataRolloverPattern("monthly"),
 		},
 		{
 			name:                          "Call and error will be fallen from setPolicyTemplateReturnsError minAge = 20d",
 			setIlmPolicyReturnsError:      false,
 			setPolicyTemplateReturnsError: true,
-			minAgeDeletePolicy:            "20d",
+			rolloverplan:                  DataRolloverPattern("monthly"),
 		},
 	}
 	for _, tt := range tests {
@@ -122,9 +122,9 @@ func Test_setIlmPolicy(t *testing.T) {
 				setIlmPolicyReturnsError:      tt.setIlmPolicyReturnsError,
 				setPolicyTemplateReturnsError: tt.setPolicyTemplateReturnsError,
 				isExecute:                     make([]bool, 2),
-				ilmPolicyReturnsDeleteAge:     tt.minAgeDeletePolicy,
+				ilmPlan:                       tt.rolloverplan,
 			}
-			err := setIlmPolicy(&db, tt.minAgeDeletePolicy)
+			err := setIlmPolicy(&db, tt.rolloverplan)
 			if err != nil && !tt.setIlmPolicyReturnsError && !tt.setPolicyTemplateReturnsError {
 				t.Error("Got error but all error mocks are set to false")
 			}
