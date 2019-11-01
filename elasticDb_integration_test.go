@@ -107,7 +107,7 @@ func TestNewElasticDb_SetIlmPolicy(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error by connect to db" + err.Error())
 	}
-	db.SetIlmPolicy("20d")
+	db.SetIlmPolicy(DataRolloverPattern("monthly"))
 	ls := elastic.NewXPackIlmGetLifecycleService(db.dbClient)
 	res, err := ls.Policy("funk_policy").Do(db.ctx)
 	if err != nil {

@@ -1,1 +1,1 @@
-{"delete":{"actions":{"delete":{}},"min_age":"20d"}}
+{"cold":{"actions":{"freeze":{}},"min_age":"30d"},"delete":{"actions":{"delete":{}},"min_age":"8d"},"warm":{"actions":{"shrink":{"number_of_shards":1}},"min_age":"8d"}}
