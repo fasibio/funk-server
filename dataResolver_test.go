@@ -229,3 +229,29 @@ func TestDataServiceWebSocket_Root(t *testing.T) {
 		t.Errorf("Want statuscode %v but got %v", 200, res.StatusCode)
 	}
 }
+
+func Test_getStatsIndexName(t *testing.T) {
+	tests := []struct {
+		name  string
+		param string
+		want  string
+	}{
+		{
+			name:  "given cumulated so want cumulated back",
+			param: "lalal_stats_cumulated",
+			want:  "stats_cumulated_funk-",
+		},
+		{
+			name:  "given not cumulated so want stats_funk- back",
+			param: "lalal_stats",
+			want:  "stats_funk-",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getStatsIndexName(tt.param); got != tt.want {
+				t.Errorf("getStatsIndexName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

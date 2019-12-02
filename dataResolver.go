@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/fasibio/funk-server/logger"
@@ -128,7 +129,16 @@ func (u *DataServiceWebSocket) interpretMessage(messages []Message, logs *zap.Su
 					Attributes:    msg.Attributes,
 					StaticContent: staticContent,
 				}, msg.SearchIndex+"_funk-"+getIndexDate(time.Now(), u.rollOverPattern))
-
+			case MessageTypeStats:
+				{
+					u.Db.AddStats(StatsData{
+						Timestamp:     msg.Time,
+						Type:          string(msg.Type),
+						Stats:         d,
+						Attributes:    msg.Attributes,
+						StaticContent: staticContent,
+					}, getStatsIndexName(msg.SearchIndex)+getIndexDate(time.Now(), u.rollOverPattern))
+				}
 			default:
 				{
 					u.Db.AddStats(StatsData{
@@ -142,6 +152,15 @@ func (u *DataServiceWebSocket) interpretMessage(messages []Message, logs *zap.Su
 			}
 		}
 	}
+}
+
+func getStatsIndexName(name string) string {
+	if strings.Contains(name, "_stats_cumulated") {
+		return "stats_cumulated_funk-"
+	} else {
+		return "stats_funk-"
+	}
+
 }
 
 func (u *DataServiceWebSocket) messageSubscribeHandler(uuid string, c *websocket.Conn) {
