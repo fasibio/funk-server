@@ -22,7 +22,7 @@ services:
     environment:
       FUNK_SERVER: ws://funk-server:3000 # the adress to the funk-server it can be external too (is a websocket so ws instance of http and wss instance of https)
       CONNECTION_KEY: changeMe7894561323 # The Shared Key configured at your funk-server installation
-      ENABLE_GEO_IP_INJECT: "true" # Allow this agent to inject geo ip information and the label key funk.log.geodatafromip	 is now enabled see at testhttpd service
+      ENABLE_GEO_IP_INJECT: "false" # is broken at the moment so not activate
     labels: 
       "funk.searchindex": "funk_agent" # The index at your elasticseach db to collect logs from this container
 
